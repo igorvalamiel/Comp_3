@@ -1,0 +1,80 @@
+Tipos abstratos de dados precisam de encapsulamento
+
+ENCAPSULAMENTO : Ocultamento da informação
+    - Esconder a implementação
+    - Acesso somente a funções
+    - Validação e Conversão 
+
+TIPO ABSTRATOS DE DADOS (TAD)
+    - Mecanismo formal que mpermite definir tipoas verdadeiramente encapsulados e seguros em uma linguagem de programação
+    - Escondem a implementação
+    - Especificam operações permitidas
+    - Única forma de manipulação
+    - Status de tipo nativo
+        - O que diferencia o TAD é justamente essa "camuflagem" de um tipo programado como se fosse da própria linguagem
+
+PILARES DA ORIENTAÇÃO A OBJETOS
+    - Encapsulamento
+    - Herança
+    - Polimorfismo
+---------------------------------------------------------------------
+PILHA SEM ENCAPSULAMENTO
+
+struct PilhaInt {
+    int tab[MAX_PILHA];
+    int atual
+};
+
+---------------------------------------------------------------------
+PILHA COM FUNÇÕES DE INTERFACE
+
+struct PilhaInt {
+    int tab[MAX_PILHA];
+    int atual
+};
+
+void empilha(PilhaInt* p, int valor) {
+    p->tab[p->atual++] = valor;
+}
+
+void desempilha(PilhaInt* p,) {
+    return p-tab[--p->atual];
+}
+
+void inicializaPilha(PilhaInt* p) {
+    for (int i=0; i < MAX_PILHA; i++) {
+        p->tab[i] = 0;
+    }
+    p->atual = 0;
+}
+
+---------------------------------------------------------------------
+PILHA COM USO DE FUNÇÕES
+
+void foo() {
+    PilhaInt p;
+    int x;
+    inicializaPilha( &p );
+    empilha( &p, 8 );
+    empilha( &p, 11 );
+    x = desempilha( &p );
+}
+
+---------------------------------------------------------------------
+VALIDAÇÕES
+
+void empilha(PilhaInt* p, int valor) {
+    if (p->atual < MAX_PILHA + 1) {
+        p->tab[p->atual++] = valor;
+    } else {
+        erro( "Estouro de pilha!" );
+    }
+}
+
+void desempilha(PilhaInt* p,) {
+    if (p->atual > 0) {
+        return p-tab[--p->atual];
+    } else {
+        erro ("Pilha já está vazia!");
+    }
+}
