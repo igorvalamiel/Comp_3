@@ -1,0 +1,150 @@
+HERANÇA
+    - Mecanismo que permite defini que um tipo abstrato de dados é um subtipo de outro
+    - Substituibilidade: Deve garantir que tudo que é válido para o tipo base também é para o subtipo
+    - Características Fundamentais
+        - Herança de Características
+            - Tudo q pai tem filho tem
+        - Extensibilidade
+            - Filho pode ter coisas que o pai não tem
+        - Sobrescrita
+            - Filho pode modificar as "copias" do pai
+        - Classificação natural
+    - Usada como critério quando existe uma relação "é um"
+
+POLIMORFISMO
+    - Permite associar a cada tipo e subtipo  uma operação correspondente, que se comporta de maneira específica para cada tipo
+    - Operação comum
+    - Implementações específicas
+    - Deleção em tempo de execução
+
+ENCAPSULAMENTO
+    - Os detalhes internos de uma classe não devem ser expostos ao sódigo externo
+    - Protege a integridade dos dados
+    - Facilita manutenção e evolução do código
+    - Cria contratos claros entre as partes do sistema
+
+__________________________________________________________________________________________________________________________________________
+
+CLASSES E OBJETOS EM C++
+
+Classe (Tipo do objeto)
+    - Estrutura interna
+    - Operações disponíveis
+    - Regras de visibilidade
+
+Objeto (Instância de uma classe)
+    Em C++:
+    - Variáveis declaradas localmente em uma função
+    - Parâmetros passados para uma função
+    - Campos de outras estruturas ou classes
+    - Obejtos alocados dinamicamente com "new" (sem tipo)
+
+__________________________________________________________________________________________________________________________________________
+
+ENCAPSULAMENTO VIA CLASSES
+- As funções que manipulam o estado do objeto são membros da classe e são acessadas pelo operador "." (objeto) ou "->" (ponteiro para objeto)
+- obs: class ~ struct (defautl class = privado / default struct = publico)
+- obs2: C++ extende C com: classes, exceções, templates, referências e sobrecarga de operadores
+
+__________________________________________________________________________________________________________________________________________
+
+CLASSE PILHAINT COM ENCAPSULAMENTO
+
+class PilhaInt {
+    public:
+        PilhaInt() {
+            for (int i=0; i<MAX_PILHA; i++){
+                tab[i] = 0;
+            }
+            atual = 0;
+        }
+
+        void empilha(int valor) {
+            tab[atual++] = valor;
+        }
+
+        int desempilha () {
+            return tab[--atual];
+        }
+
+    private:
+        int tab[MAX_PILHA];
+        int atual;
+};
+
+__________________________________________________________________________________________________________________________________________
+
+ALGUMAS DEFINIÇÕES DE C++
+
+    namespace ~> pacote onde o console foi declarado
+        - namespace é o espaço que contém várias bibliotecas (todas as bibliotecas padrão do c++ estão no namespace "std")
+    
+    endl ~> Pula linha e salva o buffer inteiro (flush)
+    \n ~> Só pula a linha
+
+__________________________________________________________________________________________________________________________________________
+
+INTERFACE: CONVENÇÕES DE NOMENCLATURA
+
+Classes e Funções:
+    - Primeira letra do nome em maiúscula. Demais palavras do nome também iniciam em maiúscula, sem usar underscore
+    - Ex.: PilhaInt, CalculadoraImposto, empilha(), desempilha()
+
+Ponteiros e Dados:
+    - Ponteiros usam o prefixo ptr e podem usar underscore para separar palavras
+    - Ex.: ptr_lista, ptrNo
+
+Constantes e Enumeráveis
+    - Constantes e tipos enumeráveis são escritos em caisa alta com underscore
+    - Ex.: GL_FLOAT, GLUT_DOUBLE, MAX_PILHA
+
+Prefixo de Pacotes
+    - Funções de uma biblioteca deve usar um prefixo identificador do pacote para evitar colisão de nomes
+
+__________________________________________________________________________________________________________________________________________
+
+SEPARAÇÃO: INTERFAÇE vs IMPLEMENTAÇÃO
+    - Criar arquivo (sem extensão) só com as declarações da interface e outro (.cpp) só para a implementação em si
+    
+    Vantagens:
+        - Recompilação seletica ~> mudanças na implementação não forçam recompilação de todo o projeto, apenas dos arquivos afetados
+        - Ocultamento comercial ~> bibliotecas podem ser distribuídas apenas com o arquivo de declaração e o .lib/.so, sem revelar o código-fonte
+
+__________________________________________________________________________________________________________________________________________
+
+REPRESENTAÇÃO EM UML
+
+    - UML (Unified Modeling Language) é notação padrão ...
+
+    !!!!!!!!! LER NO PDF !!!!!!!!!!!!!!
+
+__________________________________________________________________________________________________________________________________________
+
+IMPLEMENTAÇÃO EM ARQUIVO SEPARADO
+
+    As implementações usam a sintace de finção mais o nome da calsse e o operador escopo ::
+        - Ex.: TipoRetorno NomeClasse::NomeFunca (parametros) {}
+        - obs: Quando se cria uma função filho de uma classe de outro arquivo, todos os arquivos que importarem essa classe também poderão usar essa função
+
+__________________________________________________________________________________________________________________________________________
+
+CONSTRUTORES E DESTRUTORES
+
+    Construtor
+        - Define como o objeto é decçaradp e iniciado. Tem o mesmo nome da classe e não tem tipo de retorno
+        - É chamado automaticamente no momento em que o objeto é criado
+        - Se a iniciação não casar com nenhunm construtor existente, o compilador reportará o erro
+        - Uma classe pode ter mpultiplos construtores com diferentes assinaturas (overloading)
+    
+    Destrutor
+        - Define como o objeto será destruído quando sair de escopo ou for explicitamente deletado
+        - Tem nome da classe prefixado com "~"
+        - No mímimo deve liberar memória que foi alocada com new/malloc no construtor
+        - Se nenhum destrutor dor declarado, será gerado um default, que aplicará o destrutor correspondente a cada dado membro da classe
+        - Deve ser declatado "virtual" para garantir a chamada correta de hierarquias de herança
+            - Falar que um método é virtual significa que ele é polimórfico
+            - Um método virtual demora 2x ou 3x mais que uma não virtual
+            - Para uma classe que tem filhos, o destrutor precisa ter "virtual"
+    
+    Regra geral: Se um construtor alocou recursos, o destrutor deve liberá-los. Isso é o fundamento do padrão RAII (Resource Acquisition Is Initialization)
+
