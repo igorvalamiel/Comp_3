@@ -52,6 +52,7 @@ OPERADOR DE ATRIBUIÇÃO
 OBS: Sempre verifique se "this != &p" antes de copiar para evitar auto-atribuição problemática: "if (this == &p) return *this;"
 
 Implementação do Operador =
+
     class PilhaInt 
     { 
     public:
@@ -72,4 +73,39 @@ Implementação do Operador =
 - O ponteiro this: "this" é um ponteiro para o próprio objeto (o objeto do lado esquerdo da atribuição). "return p" retorna uma referência ao prórpio objeto passado como parâmetro, permitindo encadeamento de atribuições
 __________________________________________________________________________________________________________________________________________
 SOBREPOSIÇÃO DE OPERADORES
+- Uma das características mais poderosas do C++ é a capacidade de redefinir o comportamento de operadores para classes definidas pelo programador
 
+Regras Gerais
+    - Em C++ quase todos os operadores podem ser sobrecarregados (exceções ~> ".", ".*", "?:" e "sizeof")
+    - Precedêcia e aridade não são alteradas
+    - Um operador binário geralmente retorna um objeto por valor
+    - Também pode ser implementado invocanto o operador de atribuição internamente
+
+Quando usar sobrecarga de operadores?
+    - O tipo representa uma entidade matemática (vetor, matriz, complexo, etc)
+    - A operação tem semântica clara e óbvia para o tipo
+    - Torna o código cliente mais legível e expressivo
+
+__________________________________________________________________________________________________________________________________________
+SOBREPOSIÇÃO COM OPERADOR <<
+
+    class PilhaInt 
+    { 
+    public:
+    ...
+        PilhaInt& operator << (int valor) {
+        empilha( valor );
+        return *this;
+        }
+    ...
+    };
+
+Com esse operador, é possível usar a sintaxe:
+    PilhaInt p;
+    p << 8 << 11 << 42;
+
+Análise do operador
+    - O operador << foi sobrecarregado para a classe PilhaInt, permitindo uma sintaxe mais fluente e encadeada para empilhar valores
+    - Implementação simples: reutiliza o método "empilha" já existente, sem duplicar lógica
+    - Retorna "*this": retorna uma referência ao próprio objeto, habilitando o encadeamento ~> a << b << c ...
+    - Retorno por referência não constante: diferente do operador =, aqui faz sentido retornar referência não constante para permitir o encadeamento

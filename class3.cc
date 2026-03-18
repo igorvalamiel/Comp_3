@@ -21,6 +21,11 @@ class PilhaInt {
         return p;
     }
 
+    PilhaInt& operator << (int valor) {
+      empilha( valor );
+      return *this;
+    }
+
   private:
     int tab[MAX_PILHA];
     int atual;
