@@ -1,0 +1,44 @@
+CONSTRUTOR DE CÓPIA
+- O construtor de cópia é um construtor especial chamado quando um objeto pe criado a partir de outro objeto da mesma classe.
+- Ele é invocato automaticamente em três situações principais:
+    - Passagem por valor
+        - Quando um objeto é passado como parâmetro por valor para uma função, uma cópia é criada.
+        - O construtor da cópia é responsável por inicializá-la
+    - Retorno por valor
+        - Quando uma função retorna um objeto por valor, uma cópia do objeto retornado é criado para o chamador
+    - Inicialização de novo objeto
+        - Quando um novo objeto é inicializado com outro (ex.: PilhaInt p2 = p1;)
+
+- Se nenhum construtor de cópia for declarado, será criado um default que aplicará o construtor de cópia a cada dado do membro, restando três opções:
+    - Usar o default
+        - Avalie cuidadosamente se o comportamento de cópia membro a membro é adequado para sua classe
+    - Escrever um próprio
+        - Implemente um construtor de cópia personalizado quando a cópia superficial não for suficiente (ex.: classe com ponteiros)
+    - Desativá-lo
+        - Construtor de cópia como private para impedir que o objeto seja copiado (útil para recursos únicos)
+
+EXEMPLO DE CONSTRUTOR DE CÓPIA
+class PilhaInt
+{ 
+  public:
+    PilhaInt();
+    PilhaInt( const PilhaInt& p );
+    void empilha( int valor );
+    int desempilha();
+  private:
+    int tab[MAX_PILHA];
+    int atual;
+};
+
+- Parâmetro por referência
+    - O construtor de cópia semre recebe o parâmetro por referência (&).
+- Qualificador const
+    - O qualidicador const garante que o objeto fonte não será modificado durante a cópia. É boa prática e permite receber objetos temporários (rvalues)
+- Implementação
+    - A implementação deve copiar todos os dados relevantes: o array "tab" e o índice "atual", garantindo que a cópia seja independente do original
+__________________________________________________________________________________________________________________________________________
+OPERADOR DE ATRIBUIÇÃO
+
+__________________________________________________________________________________________________________________________________________
+SOBREPOSIÇÃO DE OPERADORES
+
