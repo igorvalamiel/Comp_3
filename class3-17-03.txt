@@ -39,6 +39,37 @@ class PilhaInt
 __________________________________________________________________________________________________________________________________________
 OPERADOR DE ATRIBUIÇÃO
 
+- O operador = é usado para copiar objetos do mesmo tipo quando ambos já existem. Se difere do construtor de cópia porque age sobre um objeto já inicializado
+- Características Importantes
+    - O construtor de cópia cria um novo objeto; o operador = age sobre um objeto já existente
+    - Deve retornar uma referência constante ao objeto passado como parâmetro (const PilhaInt&)
+    - Retorno por valor não é uma boa ideia - cria uma cópia desnecessária
+    - Se não for definido, haverá uma cópia membro a membro dos dados (default)
+
+- Retornar uma referência não constante tornaria (A = B) = C válido sintaticamente, mas sem sentido semântico
+- Retornar uma referência constante impede o uso incorreto e ainda permite o encadeamento natural A = B = C
+
+OBS: Sempre verifique se "this != &p" antes de copiar para evitar auto-atribuição problemática: "if (this == &p) return *this;"
+
+Implementação do Operador =
+    class PilhaInt 
+    { 
+    public:
+    ...
+        const PilhaInt& operator= ( const PilhaInt& p ){
+            if( this != &p ) {
+                atual = p.atual;
+                for( int i = 0; i < p.atual; i++ ) {
+                    tab[i] = p.tab[i];
+                }
+            }
+            return p;
+        }
+    }
+
+- Assinatura: "operator =" é a sintaxe C++ para sobrecarregar o operador de atribuição.
+- Cópia dos dados: Copia o íntice atual e, em seguida, copia elemento a elemento o conteúdo do array tab - apenas os elementos válidos
+- O ponteiro this: "this" é um ponteiro para o próprio objeto (o objeto do lado esquerdo da atribuição). "return p" retorna uma referência ao prórpio objeto passado como parâmetro, permitindo encadeamento de atribuições
 __________________________________________________________________________________________________________________________________________
 SOBREPOSIÇÃO DE OPERADORES
 

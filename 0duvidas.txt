@@ -4,3 +4,7 @@ CONSTRUTOR DE CÓPIA
 DESTRUTOR
 - virtual ~PilhaInt destroi automaticamente?
 - como destroi usando (const PilhaInt& p) ?
+
+OPERADOR DE ATRIBUIÇÃO
+- Retorno por valor não é uma boa ideia
+

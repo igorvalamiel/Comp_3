@@ -10,6 +10,17 @@ class PilhaInt {
     PilhaInt( const PilhaInt& p );
     virtual void empilha( int valor );
     int desempilha();
+
+    const PilhaInt& operator= ( const PilhaInt& p ){
+        if( this != &p ) {
+            atual = p.atual;
+            for( int i = 0; i < p.atual; i++ ) {
+                tab[i] = p.tab[i];
+            }
+        }
+        return p;
+    }
+
   private:
     int tab[MAX_PILHA];
     int atual;
