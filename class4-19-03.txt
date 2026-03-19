@@ -1,0 +1,201 @@
+TEMPLATES
+- São o mecanismo de C++ para programação genérica (escrever código qie funciona corretamente para tipos arbritários, sem duplicação)
+- Limitações do typedef
+    - O mecanismo baseado em typedef permite criar rotinas genéricas para um tipo de cada vez, mas não é suficiente quando queremos rotinas que funcionem com tipos diferentes simultaneamente
+- Template como padrão
+    - Uma template não é uma função comum, mas sim um padrão (molde) para criar funções. Quando iniciada com um tipo particular, uma nova função real é criada pelo compilador
+- Expansão pelo compilador
+    - A template é expandida (como uma macro) para prover uma função real. O compilador gera código a partir da template para cada combinação diferente de parâmetros de tipo usados no programa
+- Zero custo em tempo de execução
+    - Por ser gerado em tempo de compilação, o código de uma template tem o mesmo desempenho de código escrito manualmente para cada tipo (sem overhead de indireção em tempo de execução)
+
+Implementação da Template:
+
+    template <class Etype>
+    inline const Etype& Max (
+        const Etype& a,
+        const Etype& b ) {
+    return a > b ? a : b;
+    }
+
+    - Parametro de tipo (Etype): Define o tipo do parÂmetro do template. Pode ser qualquer tipo, nativo ou definido pelo programador
+    - Keyword inline: O código da template pode ser substituido como uma macro usando "inline", evitando o overhead de chamada de função para operações simples
+    - Retorno por referência
+        - Deve-se retornar uma referÊncia, pois não se sabe de antemão o tamanho do dado retornado. Evita cópias desneccessárias
+    - Requisito do operador
+        - O operador > deve estar definido no tipo "Etype". Se não, o compilador reportará erro na instalação
+
+obs: Os parâmetros da template devem iniciar como class ( ou typename ) ou namespace [você pode criar nomes para a classe]
+    - convenção: para templates geralemente usamos só uma letra maiúscula
+    - "inline": Pede para que o compilador faça tudo para que o compilador nao chame uma função, apenas substitua pelo retorno do template (meio desnecessário para compiladores modernos)
+
+__________________________________________________________________________________________________________________________________________
+CLASSES TEMPLATE
+- Assim como funções, classes inteiras podem ser parametrizadas por tipo usando templates
+
+- Declaração e uso
+    - Uma classe com template é declarado template <class Tipo> antes da definição da classe.
+    - Ao usar a classe, se especifica-se o tipo entre <>
+- Sem biblioteca de template
+    - Não há sentido em compilar templates para uma biblioteca antecipadamente
+    - O compilador não sabe quais tipos serão necessários, portanto não gera código algum até a instalação
+- Código junto com a interface
+    - O código completo da template deve ficar junto com a declaração no .h, ou a template deve ser instaciada explicitamente para cada tipo a ser usado na apliacação
+
+__________________________________________________________________________________________________________________________________________
+TEMPLATE PILHA
+
+    template <class Tipo>
+    class Pilha
+    { 
+    public:
+        Pilha();
+        void empilha( Tipo valor );
+        Tipo desempilha();
+    private:
+        Tipo tab[MAX_PILHA];
+        int atual;
+    };
+
+O poder da generalização
+    - Com esse template, a classe Pilha funciona para qualquer tipo. O parâmetro Tipo substitui as ocorrências do tipo específico em toda a definição da classe:
+        - Tipo valor: o parâmtero de empilha se adapta ao tipo usado
+        - Tipo desemplilha(): o retorno de desempilha também se adapta
+        - Tipo tab[MAX_PILHA]: o array interno armazena elementos do tipo correto
+    Uma única definição de classe gera Pilha<int>, Pilha<double>, Pilha<string>, etc
+
+__________________________________________________________________________________________________________________________________________
+OPERADOR >> COM TEMPLATE
+
+    PilhaInt& operator << (int valor) {
+        empilha( valor );
+        return *this;
+        }
+    
+                    |
+                    |
+                    |
+                    v
+    
+    Pilha <Tipo>& operator << (const Tipo& valor) {
+      empilha( valor );
+      return *this;
+    }
+
+__________________________________________________________________________________________________________________________________________
+HERANÇA: REUTILIZAÇÃO* COM PROPÓSITO
+
+- Usamos herança para classificação e montagem de hierarquia de abstrações para facilitar entendimentos
+
+Objetivos mais importantes que a reutilização:
+    - Ocultamento da informação: separação entre interface e implementação
+    - Separação de responsabilidades: Cada classe tem um propósito claro
+    - Legibilidade: codigo que expressa claramente a intenção
+    - Manutenibilidade: facilidade de modificar sem quebrar
+
+Quando usar herança:
+    - Templates são mais apropriadas quando a funcionalidade básica do código é independente de tipo
+    - Herança serve quando se deseja estender o comportamento de um tipo específico
+    - Criamos novos tipos com propriedades restritas ou estendidas do tipo original
+
+OBS: Heranças acima de 2 níveis sempre deve ter muito cuidado!!!
+
+__________________________________________________________________________________________________________________________________________
+COMPOSIÇÃO PARA REUTILIZAÇÃO
+
+- Não usar Herança, usar Composição
+- Objeto que tem como atributo outro objeto
+- Usar outras classes como campos membros. A classe contém instâncias de outras classes, mas não herda delas
+    - Menor acoplamento: a classe não precisa conhecer os internos da que usa
+    - Maior encapsulamento: a classe usada pode ser facilmente trocada
+    - Mais flexível em tempo de execução
+    - Hierarquia mais simples e compreensível
+
+__________________________________________________________________________________________________________________________________________
+POLIMORFISMO ESTÁTICO
+
+O polimorfismo permite que um objeto possa representar e operar sobre vários tipos diferentes
+
+- Definição de polimorfismo: Polimorfismo permite que um objeto possa armazenar vários tipos diferentes de objetos. Quando uma operação for aplicada, será selecionada automaticamente aquela adequada ao tipo armazenado
+- Sobrecarga de funções (overload): Sobreposição de funções e operadores é um exemplo de polimorfismo estático. A seleção da função correta é feita em tempo de compilação com base nos tipos de argumentos
+- Templates como polimorfismo: Templates são outro example de polimorfismo estático. O compilador gera versões especializadas da função classe para cada tipo utilizado, selecionando a versão correta em tempo de compilação
+__________________________________________________________________________________________________________________________________________
+POLIMORFISMO DINAMICO
+
+- Em C++, é possível postergar a seleção da função até que o programa esteja sendo executado em tempo de execução (runtime).
+- O mecanismo básico utiliza herança combinada com funções virtuais. Em C++, cria-se uma classe base polimorfa que pode representar objetos das classes derivadas.
+- Quando um método virtual é chamado através de um ponteiro ou referência para a classe base, o C++ determina automaticamente qual versão do método invocar — com base no tipo real do objeto apontado.
+__________________________________________________________________________________________________________________________________________
+DERIVAÇÃO: HERANÇA NA PRÁTICA
+
+    class Derivada: public Base {
+    // membros não listados 
+    // são herdados.
+    public:
+        // construtores e destrutores
+        // (em geral diferentes da base)
+        
+        // membros da base sobrepostos
+        
+        // novos membros públicos
+        
+    private:
+        // dados adicionais 
+        // (geralmente privados)
+        // funções privadas adicionais
+        // membros da base a desativar
+    };
+
+Propriedades Fundamentais da Derivação
+- Uma classe derivada herda todas as propriedades da classe base — dados e funções públicas e protegidas.
+- Cada classe derivada é uma nova classe. A classe base não é afetada por mudanças nas classes derivadas.
+- Uma classe derivada é compatível por tipo com a base — pode ser usada onde se espera a base. O contrário é falso.
+- Classes irmãs (derivadas da mesma base) não são compatíveis entre si por tipo.
+__________________________________________________________________________________________________________________________________________
+TIPOS DE HERANÇA EM C++
+
+- Herança Pública (public): Todos os membros públicos da classe básica permanecem públicos na classe derivada. Os membros privados permanecem privados (inacessíveis diretamente na derivada).
+    - É-um
+- Herança Privada (private): Mesmo os membros públicos da classe base ficam ocultos para o mundo externo. É a herança default em C++ (quando não se especifica o tipo).
+    - Tem-um
+- Herança Protegida (protected): Membros públicos da base tornam-se protegidos na derivada — acessíveis por classes derivadas desta, mas não pelo mundo externo. Uso bastante raro na prática.
+__________________________________________________________________________________________________________________________________________
+HERANÇA DE CONSTRUTORES E OPERADORES ESPECIAIS
+
+    #include <iostream>
+
+    using namespace std;
+
+    class Base {
+        public:
+            Base() : campo_int(0) {
+                cout << "Chamou construtor de base" << endl;}
+
+            ~Base() {
+                cout << "Chamou construtor de base" << endl;}
+
+        private:
+            int campo_int;
+    };
+
+    class Derivada : public Base {
+        public:
+            Derivada(): Base(), x(0.8) {}
+
+        private:
+            double x;
+    };
+
+    int main() {
+
+        Base a, b;
+        cout << sizeof(a) << endl;
+
+        return 0;
+    }
+
+- Estado Herdado: O estado de público ou privado dos construtores, construtor de cópia e operador de atribuição são herdados da classe base para a derivada.
+- Comportamento Default: Se eles forem herdados, mas não definidos na classe derivada, os operadores correspondentes são aplicados a cada membro da derivada automaticamente.
+- Chamada Explícita da Base: O construtor da derivada deve chamar explicitamente o construtor da classe base usando a lista de inicialização.
+
+__________________________________________________________________________________________________________________________________________
