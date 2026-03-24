@@ -1,0 +1,42 @@
+Quando não criamos um construtor, o C++ cria um construtor vazio (sem parâmetros), que chama o construtor pai também sem parâmetros.
+
+C++ é posicional, pois os parâmetros de uma função são defindos pela posição. Ex.:
+    Quadrado(double x, double y, double lado) ~> Quadrado(0,1,1):
+        x = 0; y = 1; lado = 1
+
+Resolvendo cópias criadas (quando não falamos nada ao programa, ele sempre passa as variáveis por cópia)
+    - usando virtual na classe pai
+    - Uso da VMT (ou vtable) : Tabela de Métodos Virtuais
+
+Um destrutor de uma classe não necessariamente precisa ser virtual, mas é DE MUITO BOM TOM
+__________________________________________________________________________________________________________________________________________
+BIDING ESTÁTICO E DINÂMICO
+
+Binding Estático (default em C++)
+    - No binding estático, a decisão de que função invocar para resolver uma sobreposição é tomada em tempo de compilação.
+    - C++ usa binding estático por default porque, historicamente, se achava que o overhead do binding dinâmico seria significativo para muitas aplicações de sistemas.
+    - Resultado: a função chamada depende do tipo declarado da variável, não do tipo real do objeto em memória.
+
+Binding Dinâmico (virtual)
+    - No binding dinâmico, a decisão é tomada em tempo de execução — com base no tipo real do objeto.
+    - Para forçar o binding dinâmico, o programador deve especificar a função como virtual na classe base.
+    - Resultado: a função chamada depende do tipo real do objeto em memória — mesmo que o ponteiro seja do tipo da classe base.
+
+OBS: Construtores NUNCA são virtuais e Destrutores DEVEM ser virtuais
+__________________________________________________________________________________________________________________________________________
+BIDING DINÂMICO
+
+Ponteiro para Classe Base
+    - Quando se declara um ponteiro para uma classe base como argumento de função, pode-se passar qualquer uma das classes derivadas. O tipo do objeto apontado é determinado apenas em tempo de execução.
+
+Virtualidade é Herdada
+    - Uma vez declarada virtual na classe base, a função permanece virtual em todas as classes derivadas — mesmo sem redeclarar virtual nas derivadas (embora seja boa prática fazê-lo).
+
+Redeclaração nas Derivadas
+    - Funções redefinidas em classes derivadas devem ser declaradas virtual explicitamente por clareza. Isso torna evidente ao leitor do código que aquela função participa de uma hierarquia polimórfica.
+
+Somente via Ponteiros
+    - Uma decisão em tempo de execução só é necessária — e só ocorre — quando o objeto for acessado através de ponteiros ou referências. Acesso direto por valor usa binding estático.
+__________________________________________________________________________________________________________________________________________
+
+Erro "arguments discards" -> problema com "const"
