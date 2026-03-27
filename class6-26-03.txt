@@ -1,0 +1,69 @@
+PONTEIROS
+
+Operador &
+    - O operador & retorna o endereço de memória da uma variável (ex.: &x retorna o endereço da variável x)
+
+Operador *
+    - Um ponteiro é uma variável que guarda um endereço de memória
+    - Declaração ~> int *p;
+    - Significado ~> p é um ponteiro para inteiro
+__________________________________________________________________________________________________________________________________________
+NEW e DELETE
+
+Alocação Dinâmica
+    - Stack (Pilha)
+        - Tamanho definido em tempo de compilação
+        - Liberação automática ao sair escopo
+        - Rápida, mas limitada
+    - Heap (Monte)
+        - Tamanho definido em tempo de execução
+        - tempo de vida controlado manualmente pelo programador
+        - Flexível, mas exige cuidado
+
+O Operador new
+    - Aloca memória no Heap
+        - Solicita ao SO necessário para o tipo especificado
+    - Chama o construtor
+        - Inicializa o objeto recém-alocado invocando o construtor correspondente
+    - Retorna um ponteiro
+        - Devolve o endereço da memória alocada como Tipo*
+
+O Operador delete
+    - O que acontece ao chamar delete p
+        [1] Chamar o destrutor: Executa a limpeza definida em ~Tipo()
+        [2] Libera a memória: Devolve o bloco 
+    - Após o delete
+        - O ponteiro torna-se inválido - chamado de dangling pointer. Acessá-lo é comportamento indefinido
+    - Boa prática: sempre atribua nullptr ao ponteiro após delete p; p = nullptr;
+
+new[] e delete[] - Arrays no Heap
+    - new : Objeto único ~> usa delete p
+    - new[] : Arrays de objetos ~> usa delete[] arr;
+
+Vazamento de Memória (Memory Leak)
+    - Se delete não for chamado, a memória permanece ocupaa até o programa encerrar - crítico em sistemas de longa duração
+    - Valgrind : Ferramenta clássica para detectar leaks e acessos inválidos em Linux
+    - AddressSanitizer : Compilado com "-fsanitiza=address;" ~> detecta leaks em tempo de execcução
+    - Smart Pointers : "unique_prt" e "shared_ptr" chamam delete automaticamente ao sair do escopo.
+
+Boas Práticas
+    - Parear corretamente
+        - new <~> delete
+        - new[] <~> delete[]
+    - Destruidor virtual em toda base polimórfica
+        - Se a classe tem algum método virtual, o destruidor também deve ser virtual
+    - Prefira Smart Pointers
+        - "unique_prt" e "shared_ptr" eliminam erros de dangling pointer e double delete
+__________________________________________________________________________________________________________________________________________
+
+__________________________________________________________________________________________________________________________________________
+
+__________________________________________________________________________________________________________________________________________
+
+__________________________________________________________________________________________________________________________________________
+
+__________________________________________________________________________________________________________________________________________
+
+__________________________________________________________________________________________________________________________________________
+
+__________________________________________________________________________________________________________________________________________
