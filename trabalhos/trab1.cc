@@ -17,7 +17,7 @@ class PilhaInt {
         void print( std::ostream& o, const char* msg="") {
             o << msg << std::endl;}
         
-        PilhaInt operator << (const int valor) {
+        PilhaInt& operator << (const int valor) {
             empilha( valor );
             return *this;}
         
@@ -29,9 +29,9 @@ class PilhaInt {
  
 int main() {
     PilhaInt p;
-    p << 19 << 18 << 17 << 30;
-    p.print( cout );
-    cout << endl;
+    p << 19 << 18 << 17;
+    p << 30;
+    cout << p.desempilha() << "," << p.desempilha() << "," << p.desempilha() << "," << p.desempilha() << endl;
 
     return 0;
 }
