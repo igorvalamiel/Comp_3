@@ -23,7 +23,7 @@ class PilhaInt {
             }
             txt << " ]";
             std::string texto = txt.str();
-            o << texto << std::endl;}
+            o << texto;}
         
         PilhaInt& operator << (const int valor) {
             empilha( valor );
