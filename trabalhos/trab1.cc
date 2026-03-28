@@ -25,6 +25,14 @@ class PilhaInt {
             std::string texto = txt.str();
             o << texto;}
         
+        const PilhaInt& operator = ( const PilhaInt& p ){
+            if( this != &p ) {
+                atual = p.atual;
+                for( int i = 0; i < p.atual; i++ ) {
+                    tab[i] = p.tab[i];}
+            } 
+            return p;}
+        
         PilhaInt& operator << (const int valor) {
             empilha( valor );
             return *this;}
@@ -36,13 +44,20 @@ class PilhaInt {
 };
  
 int main() {
-    PilhaInt p;
+    PilhaInt p, q;
+    q << 2;
     p << 19 << 18 << 17 << 30;
+    q = p;
+    p.desempilha();
+    q << 7;
+    stringstream ssp, ssq;
+    p.print( ssp );
+    q.print( ssq );
 
-    stringstream ss;
-    p.print( ss );
+    cout << "q = " << ssq.str() << "\n" << "p = " << ssp.str() << endl;
 
-    cout << "{" << ss.str() << "}" << endl;
+    // Essa linha é apenas para gerar um erro se o "operator=" não for definido. Ignore-a!
+    auto l = &PilhaInt::operator=; (p.*l)(q);
 
     return 0;
 }
