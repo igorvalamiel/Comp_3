@@ -20,9 +20,6 @@ class PilhaInt {
                 }
                 arr[tam++] = v;
             }
-
-            //free(arr);
-            //arr = NULL;
         }
 
         PilhaInt(const PilhaInt& p) {
@@ -50,9 +47,7 @@ class PilhaInt {
         void redimensiona(int n) {
             
             if (atual > n) { atual = n; }
-
             cap = n;
-
             int* tmp = (int*) realloc( arr, n * sizeof(int) );
 
             if (tmp == NULL) {
@@ -92,10 +87,16 @@ class PilhaInt {
         const PilhaInt& operator = ( const PilhaInt& p ){
             if( this != &p ) {
                 atual = p.atual;
-                for( int i = 0; i < p.atual; i++ ) {
+                cap = p.cap;
+
+                int* tmp = (int*) realloc(arr, cap * sizeof(int));
+                if (tmp != NULL) {
+                    arr = tmp;
+                }
+
+                for( int i = 0; i < atual; i++ ) {
                     arr[i] = p.arr[i];}
-            } 
-            return p;}
+            } return p;}
         
         PilhaInt& operator << (const int valor) {
             empilha( valor );
@@ -109,17 +110,14 @@ class PilhaInt {
  
 int main() {
     
-    PilhaInt a{7}, b{500}, c{5};
+    PilhaInt a{7}, b{500000}, c{5};
     a << 8 << 3 << 1 << 4 << 5;
-    b << 1 << 2 << 3;
+    for( int i = 0; i < b.capacidade(); i++ )
+    b << i;
     c = a;
     a = b;
     b = c;
-    c.desempilha();
-    c << 7;
-    a.print( cout ); cout << endl;
-    b.print( cout ); cout << endl;
-    c.print( cout ); cout << endl;
+    cout << a.capacidade() << ", " << b.capacidade() << ", " << c.capacidade() << endl;
 
     return 0;
 }
