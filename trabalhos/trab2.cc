@@ -6,11 +6,27 @@ using namespace std;
 class PilhaInt {
     public:
         PilhaInt(int tamanho=10) {
-            tam = tamanho;
+            cap = tamanho;
+            
+            int* arr = (int*) malloc( cap * sizeof(int) );
+            if (!arr) { perror("malloc");}
+
+            for (int v = 10; v <= (10*cap); v += 10) {
+                if (tam == cap) {
+                    cap *= 2;
+                    int* tmp = (int*) realloc( arr, cap * sizeof(int) );
+                    if (!tmp) { perror("realloc"); free(arr); }
+                    arr = tmp;
+                }
+                arr[tam++] = v;
+            }
+
+            free(arr);
+            arr = NULL;
         }
 
-        const int get_tam() {
-            return tam;
+        const int capacidade() {
+            return cap;
         }
 
         void empilha( const int valor ){
@@ -47,21 +63,14 @@ class PilhaInt {
         static const int MAX_PILHA = 10;
         int tab[MAX_PILHA];
         int atual {0};
-        int tam;
+        int tam {0}, cap;
 };
  
 int main() {
     
-    PilhaInt p;
-    p.empilha( 1 );
-    p << 3 << 9 << 13 << 89;
-    cout << p.desempilha() << endl;
-    cout << p.desempilha() << endl;
-    p.print( cout );
-    p << 19 << 18 << 17 << 30;
-    stringstream ss;
-    p.print( ss );
-    cout << endl << "{" << ss.str() << "}" << endl;
+    PilhaInt a(5), b(15);
+    cout << a.capacidade() << endl;
+    cout << b.capacidade() << endl;
 
     return 0;
 }
