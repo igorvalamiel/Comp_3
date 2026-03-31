@@ -1,0 +1,334 @@
+MALLOC REALLOC E FREE
+
+malloc	: Aloca n bytes contíguos no heap (sem inicializar)	 ~> void* ou NULL
+realloc	: Redimensiona um bloco já alocado	                 ~> void* ou NULL
+free	: Devolve o bloco ao sistema operacional	         ~> void
+
+
+MALLOC
+
+    void* malloc( size_t n_bytes );
+
+    // Exemplo: aloca espaço para 10 inteiros
+    int* arr = (int*) malloc( 10 * sizeof(int) );
+
+    // SEMPRE verificar falha de alocação
+    if (arr == NULL) {
+        perror("malloc falhou");
+        return 1;
+    }
+
+    // Preencher o array
+    for (int i = 0; i < 10; i++)
+        arr[i] = i * i;
+
+
+REALLOC
+
+    void* realloc( void* ptr, size_t novo_tamanho );
+
+    // Dobrar a capacidade do array de 10 → 20 elementos
+    int* tmp = (int*) realloc( arr, 20 * sizeof(int) );
+
+    // NUNCA atribuir direto a arr — se realloc falhar,
+    // arr ficaria apontando para NULL e o bloco original seria perdido
+    if (tmp == NULL) {
+        perror("realloc falhou");
+        free(arr);       // liberar o bloco original
+        return 1;
+    }
+    arr = tmp;   // só agora arr aponta para o novo bloco
+
+    // Os 10 primeiros elementos foram copiados automaticamente
+    for (int i = 10; i < 20; i++)
+        arr[i] = i * i;
+
+
+obs: tem como não usar malloc nem free
+    realloc(null) == malloc()                #conferir isso aqui
+    realloc(0) == free()
+
+
+FREE
+
+    void free( void* ptr );
+
+    // Liberar o array ao final do uso
+    free(arr);
+
+    // Boa prática: zerar o ponteiro após liberar
+    // evita uso acidental de "dangling pointer"
+    arr = NULL;
+
+
+Erros clássicos:
+    - Double free: chamar free duas vezes no mesmo ponteiro → comportamento indefinido.
+    - Memory leak: esquecer de chamar free antes de perder a referência ao bloco.
+    - Dangling pointer: usar o ponteiro após free → comportamento indefinido.
+
+
+EXEMPLO COMPLETO MALLOC, REALLOC e FREE
+
+#include <stdio.h>
+#include <stdlib.h>
+
+int main() {
+    int capacidade = 4;
+    int tamanho   = 0;
+
+    /* 1. Alocação inicial */
+    int* arr = (int*) malloc( capacidade * sizeof(int) );
+    if (!arr) { perror("malloc"); return 1; }
+
+    /* 2. Inserção com crescimento dinâmico */
+    for (int v = 10; v <= 70; v += 10) {
+        if (tamanho == capacidade) {
+            capacidade *= 2;
+            int* tmp = (int*) realloc( arr, capacidade * sizeof(int) );
+            if (!tmp) { perror("realloc"); free(arr); return 1; }
+            arr = tmp;
+        }
+        arr[tamanho++] = v;
+    }
+
+    /* 3. Leitura */
+    for (int i = 0; i < tamanho; i++)
+        printf("%d ", arr[i]);
+    printf("\n");
+
+    /* 4. Liberação */
+    free(arr);
+    arr = NULL;
+    return 0;
+}
+__________________________________________________________________________________________________________________________________________
+INICIALIZAÇÃO DE ATRIBUTOS
+
+Formas de inicializar atributos:
+    - Na declaração do campo
+        class Exemplo {
+            int x = 10;   // ← aqui
+        };
+    - Com chaves
+        class Exemplo {
+            int x {10} ;   // ← aqui
+        };
+    - Na lista de inicialização do construtor
+        class Exemplo {
+            int x;
+            Exemplo() : x(10) {} // ← aqui
+        };
+
+
+COMPORTAMENTO SEM INICIALIZADOR DE ATRIBUTO
+Tipo do atributo	                                    Sem inicializador → valor inicial
+int, float, double, ponteiro…	                        Indeterminado (lixo) ⚠
+std::string, std::vector…	                            Construído pelo construtor padrão da classe ✔
+Outro objeto sem construtor padrão	                    Erro de compilação ✖
+
+
+EXEMPLO
+
+    #include <iostream>
+    #include <string>
+
+    class Produto {
+    int         codigo  = 0;        // default member initializer
+    double      preco   = 9.99;     // default member initializer
+    std::string descricao;            // string: construtor padrão → ""
+
+    public:
+    // usa TODOS os defaults
+    Produto() = default;
+
+    // sobrescreve codigo; preco e descricao usam defaults
+    Produto(int cod) : codigo(cod) {}
+
+    // sobrescreve tudo
+    Produto(int cod, double p, std::string d)
+        : codigo(cod), preco(p), descricao(d) {}
+
+    void print() const {
+        std::cout << codigo << " | " << preco
+                << " | " << descricao << '\n';
+    }
+    };
+
+    int main() {
+    Produto p1;                       // 0 | 9.99 |
+    Produto p2(42);                    // 42 | 9.99 |
+    Produto p3(7, 29.90, "Teclado"); // 7 | 29.9 | Teclado
+
+    p1.print();  p2.print();  p3.print();
+    }
+
+
+REGRAS DE OURO
+
+            Situação	                                                Valor final do campo
+Só inicializador de declaração	                                Valor da declaração ✔
+Só lista de inicialização do construtor	                        Valor da lista ✔
+Declaração e lista no mesmo construtor	                        Valor da lista (tem prioridade) ✔
+Nenhum inicializador — tipo primitivo	                        Indeterminado (lixo) ⚠
+Nenhum inicializador — objeto com construtor padrão	            Construtor padrão da classe ✔
+
+Boas práticas:
+    - Use inicializadores de declaração para valores padrão "naturais" (= 0, = nullptr, = false). Isso documenta a intenção e protege construtores que você esquecer de atualizar.
+    - Use a lista de inicialização quando o valor depende de um parâmetro do construtor.
+    - Nunca deixe tipos primitivos sem inicializar — ao menos coloque = 0 na declaração.
+__________________________________________________________________________________________________________________________________________
+PARÂMETROS CONSTANTES EM TEMPLATE
+
+template comum:
+    template <typename T>
+    void imprime(T v);
+
+parâmetro constante:
+    template <int N>
+    void repete(int v);
+
+
+QUAIS TIPOS SAO ACEITOS
+    Categoria	                    Exemplos	                C++11/14	C++20
+Inteiros	                int, long, short, char, bool…	       ✔   	     ✔
+Enumerações	                enum, enum class	                   ✔	     ✔
+Ponteiros	                T*, T(*)(…) (função)	               ✔	     ✔
+Referências	                T&	                                   ✔	     ✔
+Classes (literal types)	    struct com constexpr…	               ✖	     ✔
+Ponto flutuante	            float, double	                       ✖	     ✔
+
+
+SINTAXE E EXEMPLO BASICO
+
+    #include <iostream>
+    using namespace std;
+
+    // N é um valor inteiro constante, não um tipo
+    template <int N>
+    inline int escala( int x ) {
+    return N * x;
+    }
+
+    int main() {
+    cout << escala<10>( 8 ) << endl;  // 80
+    cout << escala<3>( 7 )  << endl;  // 21
+    return 0;
+    }
+
+
+OBTENDO O ENDEREÇO DE UMA INSTÂNCIA
+
+    // ── Forma com auto (C++11) ─────────────────────────────
+    // Compilador deduz o tipo automaticamente — mais prático
+    auto ptrFun2 = &escala<78>;
+
+    cout << ptrFun2( 10 ) << endl;  // 780
+
+	Forma explícita	                                            Forma com auto
+Sintaxe	int (*p)(int) = &escala<7>;	                        auto p = &escala<78>;
+Verbosidade	Alta — tipo completo deve ser escrito	        Mínima — compilador infere
+Quando usar	Interface pública, documentação clara	        Uso local, código conciso
+
+
+EXEMPLO COMPLETO
+    #include <iostream>
+    using namespace std;
+
+    template <int N>
+    inline int escala( int x ) {
+    return N * x;
+    }
+
+    int main( int argc, char* argv[] ) {
+
+    // Chamada direta — instância N=10
+    cout << escala<10>( 8 ) << endl;     // 80
+
+    // Ponteiro explícito — instância N=7
+    int (*ptrFun)( int ) = &escala<7>;
+    cout << ptrFun( 9 ) << endl;        // 63
+
+    // Ponteiro com auto — instância N=78
+    auto ptrFun2 = &escala<78>;
+    cout << ptrFun2( 10 ) << endl;       // 780
+
+    return 0;
+    }
+__________________________________________________________________________________________________________________________________________
+ESPECIALIZAÇÃO DE TEMPLATES
+
+    template <>
+    const char* Max(const char* a,
+                const char* b) {
+    return strcmp(a, b) > 0 ? a : b;
+    }
+
+    // Compara conteúdo corretamente ✔
+    Max("Alfa", "Beta");
+
+
+SINTAXE DE ESPECIALIZAÇÃO EXPLÍCITA
+    // ① Template genérico — deve vir PRIMEIRO
+    template <typename T>
+    T Max(T a, T b) { ... }
+
+    // ② Especialização — lista de parâmetros vazia <>
+    //    O tipo concreto aparece na assinatura da função
+    template <>                    // <> indica: nenhum parâmetro livre
+    const char* Max<const char*>(  // <const char*> pode ser omitido
+        const char* a,           // se o compilador consegue deduzir
+        const char* b) { ... }
+
+ - template <> : Lista vazia sinaliza ao compilador que esta é uma especialização total — todos os parâmetros foram fixados.
+ - Max<const char*> : Indica qual instância está sendo especializada. Pode ser omitido quando o tipo é deduzível pela assinatura.
+ - Assinatura  :  Deve ser compatível com o template genérico substituindo T pelo tipo especializado.
+
+
+ EXEMPLO COMPLETO
+
+    #include <iostream>
+    #include <string.h>
+
+    // ── Template genérico ────────────────────────────────
+    template <typename T>
+    T Max(T a, T b) {
+    return a > b ? a : b;
+    }
+
+    // ── Especialização para const char* ──────────────────
+    template <>
+    const char* Max(const char* a, const char* b) {
+    return strcmp(a, b) > 0 ? a : b;
+    }
+
+    int main() {
+    using namespace std;
+
+    // T=double deduzido automaticamente
+    cout << Max(1.4, 1.6)          << endl;  // 1.6  — genérico
+
+    // T=double fornecido explicitamente; int 1 é convertido
+    cout << Max<double>(1.4, 1)     << endl;  // 1.4  — genérico
+
+    // T=const char* deduzido; usa a especialização
+    cout << Max("Alfa", "Beta")  << endl;  // Beta — especialização
+    }
+
+
+MESMO SISTEMA FUNCIONA COM TEMPLATES
+
+    // Genérico
+    template <typename T>
+    class Pilha {
+    std::vector<T> dados;
+    // implementação genérica...
+    };
+
+    // Especialização total para bool
+    // (pode usar compactação de bits como otimização)
+    template <>
+    class Pilha<bool> {
+    std::vector<uint8_t> dados;  // armazena 8 bools por byte
+    // implementação especializada...
+    };
+__________________________________________________________________________________________________________________________________________
