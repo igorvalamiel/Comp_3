@@ -25,6 +25,12 @@ class PilhaInt {
             arr = NULL;
         }
 
+        virtual ~PilhaInt() {
+            if (arr != NULL) {
+                free(arr);
+            }
+        }
+
         const int capacidade() {
             return cap;
         }
