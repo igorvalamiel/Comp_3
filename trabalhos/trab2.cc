@@ -21,8 +21,20 @@ class PilhaInt {
                 arr[tam++] = v;
             }
 
-            free(arr);
-            arr = NULL;
+            //free(arr);
+            //arr = NULL;
+        }
+
+        PilhaInt(const PilhaInt& p) {
+            cap = p.cap;
+            atual = p.atual;
+            
+            arr = (int*) malloc(cap * sizeof(int));
+            if (!arr) { perror("malloc falhou na copia"); }
+            
+            for (int i = 0; i < atual; i++) {
+                arr[i] = p.arr[i];
+            }
         }
 
         virtual ~PilhaInt() {
@@ -50,21 +62,24 @@ class PilhaInt {
             arr = tmp;
 
             for (int i = 10; i < n; i++)
-                arr[i] = i * i;
+                arr[i] = i;
         }
 
         void empilha( const int valor ){
-            tab[atual++] = valor;}
+            if (atual >= cap) {
+                redimensiona(cap * 2);
+            }
+            arr[atual++] = valor;}
         
         const int desempilha() {
             if (atual < 0) throw;
-            return tab[--atual];}
+            return arr[--atual];}
 
         void print( std::ostream& o, const char* msg="") {
             std::ostringstream txt;
             txt << "[ ";
             for (int i = 0; i < atual; ++i) {
-                txt << tab[i];
+                txt << arr[i];
                 if (i < atual - 1) {txt << ", ";}
             }
             txt << " ]";
@@ -78,7 +93,7 @@ class PilhaInt {
             if( this != &p ) {
                 atual = p.atual;
                 for( int i = 0; i < p.atual; i++ ) {
-                    tab[i] = p.tab[i];}
+                    arr[i] = p.arr[i];}
             } 
             return p;}
         
@@ -87,8 +102,6 @@ class PilhaInt {
             return *this;}
         
     private:
-        static const int MAX_PILHA = 10;
-        int tab[MAX_PILHA];
         int atual {0};
         int tam {0}, cap;
         int* arr;
@@ -96,14 +109,17 @@ class PilhaInt {
  
 int main() {
     
-    PilhaInt a{81};
-    a << 5 << 6 << 3 << 2 << 9 << 13;
-    a.redimensiona( 81 ); cout << a.capacidade() << endl;
-    a.redimensiona( 11 ); cout << a.capacidade() << endl;
-    a.redimensiona( 6 ); cout << a.capacidade() << endl;
+    PilhaInt a{7}, b{500}, c{5};
+    a << 8 << 3 << 1 << 4 << 5;
+    b << 1 << 2 << 3;
+    c = a;
+    a = b;
+    b = c;
+    c.desempilha();
+    c << 7;
     a.print( cout ); cout << endl;
-    a.redimensiona( 3 ); cout << a.capacidade() << endl;
-    a.print( cout ); cout << endl;
+    b.print( cout ); cout << endl;
+    c.print( cout ); cout << endl;
 
     return 0;
 }
