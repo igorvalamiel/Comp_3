@@ -5,7 +5,13 @@ using namespace std;
 
 class PilhaInt {
     public:
-        PilhaInt(): atual(0) {}
+        PilhaInt(int tamanho=10) {
+            tam = tamanho;
+        }
+
+        const int get_tam() {
+            return tam;
+        }
 
         void empilha( const int valor ){
             tab[atual++] = valor;}
@@ -40,24 +46,22 @@ class PilhaInt {
     private:
         static const int MAX_PILHA = 10;
         int tab[MAX_PILHA];
-        int atual;
+        int atual {0};
+        int tam;
 };
  
 int main() {
-    PilhaInt p, q;
-    q << 2;
+    
+    PilhaInt p;
+    p.empilha( 1 );
+    p << 3 << 9 << 13 << 89;
+    cout << p.desempilha() << endl;
+    cout << p.desempilha() << endl;
+    p.print( cout );
     p << 19 << 18 << 17 << 30;
-    q = p;
-    p.desempilha();
-    q << 7;
-    stringstream ssp, ssq;
-    p.print( ssp );
-    q.print( ssq );
-
-    cout << "q = " << ssq.str() << "\n" << "p = " << ssp.str() << endl;
-
-    // Essa linha é apenas para gerar um erro se o "operator=" não for definido. Ignore-a!
-    auto l = &PilhaInt::operator=; (p.*l)(q);
+    stringstream ss;
+    p.print( ss );
+    cout << endl << "{" << ss.str() << "}" << endl;
 
     return 0;
 }
