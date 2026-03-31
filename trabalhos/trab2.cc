@@ -8,7 +8,7 @@ class PilhaInt {
         PilhaInt(int tamanho=10) {
             cap = tamanho;
             
-            int* arr = (int*) malloc( cap * sizeof(int) );
+            arr = (int*) malloc( cap * sizeof(int) );
             if (!arr) { perror("malloc");}
 
             for (int v = 10; v <= (10*cap); v += 10) {
@@ -29,6 +29,28 @@ class PilhaInt {
             return cap;
         }
 
+        void redimensiona(int n) {
+            int diference = cap-n;
+            cap = n;
+
+            //aqui
+            //while (diference > 0){
+            //    arr.desempilha();
+            //    diference--;
+            //}
+
+            int* tmp = (int*) realloc( arr, n * sizeof(int) );
+
+            if (tmp == NULL) {
+                perror("realloc falhou");
+                free(arr);
+            }
+            arr = tmp;
+
+            for (int i = 10; i < n; i++)
+                arr[i] = i * i;
+        }
+
         void empilha( const int valor ){
             tab[atual++] = valor;}
         
@@ -47,6 +69,9 @@ class PilhaInt {
             std::string texto = txt.str();
             o << texto;}
         
+        //const PilhaInt& copy( const PilhaInt& p ){}
+        //virtual ~copy(){}
+        
         const PilhaInt& operator = ( const PilhaInt& p ){
             if( this != &p ) {
                 atual = p.atual;
@@ -64,13 +89,19 @@ class PilhaInt {
         int tab[MAX_PILHA];
         int atual {0};
         int tam {0}, cap;
+        int* arr;
 };
  
 int main() {
     
-    PilhaInt a(5), b(15);
-    cout << a.capacidade() << endl;
-    cout << b.capacidade() << endl;
+    PilhaInt a{81};
+    a << 5 << 6 << 3 << 2 << 9 << 13;
+    a.redimensiona( 81 ); cout << a.capacidade() << endl;
+    a.redimensiona( 11 ); cout << a.capacidade() << endl;
+    a.redimensiona( 6 ); cout << a.capacidade() << endl;
+    a.print( cout ); cout << endl;
+    a.redimensiona( 3 ); cout << a.capacidade() << endl;
+    a.print( cout ); cout << endl;
 
     return 0;
 }
