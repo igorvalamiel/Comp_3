@@ -30,14 +30,10 @@ class PilhaInt {
         }
 
         void redimensiona(int n) {
-            int diference = cap-n;
-            cap = n;
+            
+            if (atual > n) { atual = n; }
 
-            //aqui
-            //while (diference > 0){
-            //    arr.desempilha();
-            //    diference--;
-            //}
+            cap = n;
 
             int* tmp = (int*) realloc( arr, n * sizeof(int) );
 
