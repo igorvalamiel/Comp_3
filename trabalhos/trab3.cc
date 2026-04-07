@@ -1,4 +1,5 @@
 #include <iostream>
+#include <vector>
 #include <sstream>
 
 using namespace std;
@@ -7,38 +8,41 @@ class PilhaInt {
     public:
         PilhaInt(int tamanho=10) {
             cap = tamanho;
-            
-            arr = (int*) malloc( cap * sizeof(int) );
-            if (!arr) { perror("malloc");}
+            vec.resize(cap * sizeof(int));
+
+            // ver como tratar esse erro aqui com vector
+            //if (!arr) { perror("malloc");}
 
             for (int v = 10; v <= (10*cap); v += 10) {
                 if (tam == cap) {
                     cap *= 2;
-                    int* tmp = (int*) realloc( arr, cap * sizeof(int) );
-                    if (!tmp) { perror("realloc"); free(arr); }
-                    arr = tmp;
+                    vec.resize(cap * sizeof(int));
+
+                    // verificar esse erro com vector
+                    //if (!tmp) { perror("realloc"); free(arr); }
                 }
-                arr[tam++] = v;
+                vec[tam++] = v;
             }
         }
 
-        PilhaInt(const PilhaInt& p) {
-            cap = p.cap;
-            atual = p.atual;
-            
-            arr = (int*) malloc(cap * sizeof(int));
-            if (!arr) { perror("malloc falhou na copia"); }
-            
-            for (int i = 0; i < atual; i++) {
-                arr[i] = p.arr[i];
-            }
-        }
+        //PilhaInt(const PilhaInt& p) {
+        //    cap = p.cap;
+        //    atual = p.atual;
+        //    
+        //    vec.resize(cap * sizeof(int));
+        //    // verificar esse erro com vector
+        //    //if (!arr) { perror("malloc falhou na copia"); }
+        //    
+        //    for (int i = 0; i < atual; i++) {
+        //        vec[i] = p.vec[i];
+        //    }
+        //}
 
-        virtual ~PilhaInt() {
-            if (arr != NULL) {
-                free(arr);
-            }
-        }
+        //virtual ~PilhaInt() {
+        //    if (vec != NULL) {
+        //        free(vec);
+        //    }
+        //}
 
         const int capacidade() {
             return cap;
@@ -48,75 +52,76 @@ class PilhaInt {
             
             if (atual > n) { atual = n; }
             cap = n;
-            int* tmp = (int*) realloc( arr, n * sizeof(int) );
-
-            if (tmp == NULL) {
-                perror("realloc falhou");
-                free(arr);
+            try {
+                vec.resize(n * sizeof(int));
+            } catch (runtime_error) {
+                perror("redimenciona falhou");
             }
-            arr = tmp;
 
             for (int i = 10; i < n; i++)
-                arr[i] = i;
+                vec[i] = i;
         }
 
         void empilha( const int valor ){
             if (atual >= cap) {
                 redimensiona(cap * 2);
             }
-            arr[atual++] = valor;}
+            vec[atual++] = valor;}
         
         const int desempilha() {
             if (atual < 0) throw;
-            return arr[--atual];}
+            return vec[--atual];}
 
         void print( std::ostream& o, const char* msg="") {
             std::ostringstream txt;
             txt << "[ ";
             for (int i = 0; i < atual; ++i) {
-                txt << arr[i];
+                txt << vec[i];
                 if (i < atual - 1) {txt << ", ";}
             }
             txt << " ]";
             std::string texto = txt.str();
             o << texto;}
         
-        //const PilhaInt& copy( const PilhaInt& p ){}
-        //virtual ~copy(){}
         
         const PilhaInt& operator = ( const PilhaInt& p ){
             if( this != &p ) {
                 atual = p.atual;
                 cap = p.cap;
 
-                int* tmp = (int*) realloc(arr, cap * sizeof(int));
-                if (tmp != NULL) {
-                    arr = tmp;
-                }
+                vec.resize(cap * sizeof(int));
 
                 for( int i = 0; i < atual; i++ ) {
-                    arr[i] = p.arr[i];}
+                    vec[i] = p.vec[i];}
             } return p;}
         
         PilhaInt& operator << (const int valor) {
             empilha( valor );
             return *this;}
-
-        // função auxiliar
-        PilhaInt embaralha( PilhaInt q ) {
-            int aux = q.desempilha();
-            q << 32 << 9 << aux;
-            
-            return q;
-        }
         
     private:
         int atual {0};
         int tam {0}, cap;
-        int* arr;
+        vector<int> vec;
 };
+
+// função auxiliar
+PilhaInt embaralha( PilhaInt q ) {
+    int aux = q.desempilha();
+    q << 32 << 9 << aux;
+    
+    return q;
+}
  
 int main() {
     
+    PilhaInt a{3};
+    for( int i = 0; i < 20; i++ ) {
+    a << i;
+    cout << a.capacidade() << " ";
+    }
+    cout << endl;
+    a.print( cout ); cout << endl;
+
     return 0;
 }
