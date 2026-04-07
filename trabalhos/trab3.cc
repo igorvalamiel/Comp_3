@@ -25,25 +25,6 @@ class PilhaInt {
             }
         }
 
-        //PilhaInt(const PilhaInt& p) {
-        //    cap = p.cap;
-        //    atual = p.atual;
-        //    
-        //    vec.resize(cap * sizeof(int));
-        //    // verificar esse erro com vector
-        //    //if (!arr) { perror("malloc falhou na copia"); }
-        //    
-        //    for (int i = 0; i < atual; i++) {
-        //        vec[i] = p.vec[i];
-        //    }
-        //}
-
-        //virtual ~PilhaInt() {
-        //    if (vec != NULL) {
-        //        free(vec);
-        //    }
-        //}
-
         const int capacidade() {
             return cap;
         }
@@ -52,6 +33,8 @@ class PilhaInt {
             
             if (atual > n) { atual = n; }
             cap = n;
+
+            // ver se pode tratar erros assim
             try {
                 vec.resize(n * sizeof(int));
             } catch (runtime_error) {
