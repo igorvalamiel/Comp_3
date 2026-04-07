@@ -1,0 +1,320 @@
+COPY vs MOVE
+
+Copy Constructor / Copy Assignment
+    - Aloca um novo bloco de memória
+    - Copia todos os elementos do original
+    - Dois objetos com dados independentes ao final
+
+        Matriz(const Matriz& m)
+        : v( new Linha[L] ) {
+            //copia L*C doubles
+        }
+    
+    - sintaxe: Var&
+
+
+Move Constructor / Move Assignment
+    - Rouba o ponteiro do objeto de origem
+    - Não copia nenhum elemento
+    - Origem fica em estado válido mas vazio (nullptr)
+    
+        Matriz(Matriz&& m)
+        : v(m.v) {
+        m.v = nullptr;      //O(1)!
+        }
+
+    - obs: nao pode declarar const move
+    - sintaxe: Var&&
+
+__________________________________________________________________________________________________________________________________________
+REGRA DOS 5
+    - Se uma classe precisa de qualquer um dos cinco métodos especiais abaixo, ela provavelmente precisa de todos os cinco. O compilador deleta automaticamente copy constructor e copy assignment quando um move constructor ou move assignment é declarado.
+
+    Método	            Disparado quando	                              Deletado se move declarado?
+Destrutor	        Objeto sai de escopo ou é deletado	                            —
+Copy constructor	Inicialização a partir de lvalue: Matriz b = a;	              Sim ⚠
+Move constructor	Inicialização a partir de rvalue: Matriz b = foo();	            —
+Copy assignment	    Atribuição de lvalue: c = a;	                              Sim ⚠
+Move assignment	    Atribuição de rvalue: c = foo();	                            —
+
+__________________________________________________________________________________________________________________________________________
+LVALUE, RVALUE e &&
+
+    Matriz<300,500> a;          // construtor padrão
+
+    // a tem nome → é lvalue → chama copy constructor
+    Matriz<300,500> b = a;
+
+    // foo() retorna temporário → é rvalue → chama move constructor
+    Matriz<300,500> c = foo(a);
+
+    // Forçar move de lvalue com std::move
+    Matriz<300,500> d = std::move(b);  // b fica com v == nullptr
+
+ * T& — referência lvalue   : Liga-se a expressões com nome (variáveis). Sinaliza: "este objeto ainda vai ser usado".
+ * T&& — referência rvalue  : Liga-se a temporários e a resultados de funções. Sinaliza: "pode roubar meus recursos".
+ * std::move(x)             : Converte lvalue em rvalue. Não move nada — apenas diz ao compilador que pode chamar a versão &&.
+
+__________________________________________________________________________________________________________________________________________
+Construtor padrão
+
+    Matriz() : v( new Linha[L] ) {
+    cout << "Criou   : " << this << "/" << v << endl;
+    }
+__________________________________________________________________________________________________________________________________________
+Copy Constructor
+
+    Matriz( const Matriz& m ) : v( new Linha[L] ) {
+    for( int i = 0; i < L; i++ )
+        for( int j = 0; j < C; j++ )
+        v[i][j] = m.v[i][j];   // copia L*C elementos
+    }
+__________________________________________________________________________________________________________________________________________
+Move Constructor
+
+    Matriz( Matriz&& m ) : v(m.v) {    // rouba o ponteiro
+    m.v = nullptr;                  // deixa origem em estado válido
+    }
+__________________________________________________________________________________________________________________________________________
+Destrutor
+
+    ~Matriz() {
+    delete[] v;    // seguro mesmo se v == nullptr
+    }
+__________________________________________________________________________________________________________________________________________
+Copy Assignment
+
+    const Matriz& operator = ( const Matriz& m ) {
+    for( int i = 0; i < L; i++ )
+        for( int j = 0; j < C; j++ )
+        v[i][j] = m.v[i][j];
+    return *this;
+    }
+__________________________________________________________________________________________________________________________________________
+Move Assignment
+
+    const Matriz& operator = ( Matriz&& m ) {
+    delete[] v;     // libera buffer atual
+    v = m.v;         // rouba o ponteiro
+    m.v = nullptr;  // invalida a origem
+    return *this;
+    }
+__________________________________________________________________________________________________________________________________________
+Rastreando a execução de c = foo(a)
+
+    Matriz<300,500> foo( const Matriz<300,500>& m ) {
+    return m;   // retorna cópia de m (lvalue → copy constructor)
+    }
+
+    int main() {
+    Matriz<300,500> a, b;       // Criou: a  /  Criou: b
+    Matriz<300,500> c;          // Criou: c
+
+    c = foo( a );
+    // 1. foo() chama copy constructor de a → cria temporário tmp
+    // 2. c = tmp  → tmp é rvalue → chama move assignment em c
+    //              (c libera seu buffer, rouba o de tmp)
+    // 3. tmp sai de escopo → destrutor (delete[] nullptr — ok)
+
+    return 0;
+    // Destruiu: c  /  Destruiu: b  /  Destruiu: a
+    }
+
+
+Sequência de saída esperada:
+    Criou   : 0x... / 0x...    ← a
+    Criou   : 0x... / 0x...    ← b
+    Criou   : 0x... / 0x...    ← c
+    Copy constructor! 0x... / 0x...   ← tmp dentro de foo()
+    Move assignment!
+    deletou 0x...             ← buffer antigo de c liberado
+    Destruiu: 0x... / 0x0      ← tmp (v == nullptr, delete[] nullptr é ok)
+    Destruiu: 0x... / 0x...    ← c (agora tem o buffer de tmp)
+    Destruiu: 0x... / 0x...    ← b
+    Destruiu: 0x... / 0x...    ← a
+
+- Note que o buffer original de c foi liberado pelo move assignment, e o buffer criado em foo() foi transferido sem nenhuma cópia dos 150.000 doubles.
+__________________________________________________________________________________________________________________________________________
+Resumo — Regra dos Cinco
+
+    Método	            Assinatura	                Custo
+Destrutor	        ~Matriz()	                O(1)
+Copy constructor	Matriz(const Matriz&)	    O(L×C)
+Move constructor	Matriz(Matriz&&)	        O(1)
+Copy assignment	    operator=(const Matriz&)	O(L×C)
+Move assignment	    operator=(Matriz&&)	        O(1)
+
+Dica: Se a classe não gerencia recursos diretamente (usa std::vector, std::string etc.), os métodos gerados pelo compilador já são suficientes — a Regra do Zero. Só declare os cinco manualmente quando há posse direta de recursos com ponteiro cru.
+
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+CLASSE std::vector<T> - Array dinâmico
+
+    - #include <vector>
+
+    - Array dinâmico que gerencia automaticamente sua própria memória. Os elementos são armazenados de forma contígua no heap — assim como um array C, mas com crescimento automático quando necessário.
+    - Contíguo: Elementos lado a lado na memória — acesso por índice em O(1), amigável ao cache.
+    - Dinâmico: Cresce automaticamente com push_back. O vetor realoca o buffer quando necessário.
+    - Seguro: Gerencia a memória automaticamente — sem new/delete manual.
+__________________________________________________________________________________________________________________________________________
+Declaração e inicialização
+
+    #include <vector>
+    using namespace std;
+
+    // Vazio
+    vector<int> a;
+
+    // N elementos, todos zero
+    vector<int> b(10);
+
+    // N elementos com valor inicial
+    vector<double> c(5, 3.14);   // {3.14, 3.14, 3.14, 3.14, 3.14}
+
+    // Lista de valores (initializer_list)
+    vector<int> d = { 1, 2, 3, 4, 5 };
+
+    // Cópia de outro vetor
+    vector<int> e = d;
+
+    // A partir de um intervalo
+    int arr[] = { 7, 8, 9 };
+    vector<int> f(arr, arr + 3);  // {7, 8, 9}
+
+__________________________________________________________________________________________________________________________________________
+operator[] versus at() — a diferença crucial
+
+v[i] — sem verificação
+    vector<int> v = {1, 2, 3};
+    v[1];    // 2 — ok
+    v[10];   // comportamento
+        // INDEFINIDO
+        // silencioso ⚠
+    
+    - Rápido — sem custo extra. Use quando tiver certeza absoluta que o índice é válido (loop com limites conhecidos).
+
+v.at(i) — com verificação
+    vector<int> v = {1, 2, 3};
+    v.at(1);    // 2 — ok
+    v.at(10);   // lança
+            // std::out_of_range
+            // capturável ✔
+    
+    - Ligeiramente mais lento. Use quando o índice vem de entrada do usuário, arquivo ou outro dado não verificado.
+
+
+// Capturando a exceção de at()
+    try {
+    cout << v.at(10) << endl;
+    } catch ( const std::out_of_range& e ) {
+    cerr << "índice inválido: " << e.what() << endl;
+    }
+
+    // Verificação manual antes de acessar com []
+    int i = leDoUsuario();
+    if ( i >= 0 && i < (int)v.size() )
+    cout << v[i] << endl;   // seguro sem at()
+
+- OBS: Nunca use v[i] com índice não verificado.
+__________________________________________________________________________________________________________________________________________
+Interface principal
+
+    Método	                    O que faz	                                 Complexidade
+push_back(v)	        Insere elemento no fim	                            O(1) amortizado
+emplace_back(args)	    Constrói elemento no lugar, no fim	                O(1) amortizado
+pop_back()	            Remove o último elemento	                        O(1)
+insert(it, v)	        Insere antes do iterador	                        O [Não]
+erase(it)	            Remove elemento apontado pelo iterador	            O [Não]
+size()	                Número de elementos presentes	                    O(1)
+capacity()	            Espaço alocado (pode ser maior que size)	        O(1)
+reserve [Não]	        Pré-aloca espaço para n elementos	                O [Não]
+resize [Não]	        Redimensiona para n elementos	                    O [Não]
+clear()	                Remove todos os elementos (capacity mantida)	    O [Não]
+empty()	                Verdadeiro se size() == 0	                        O(1)
+front() / back()	    Primeiro / último elemento	                        O(1)
+data()	                Ponteiro para o buffer interno (interop C)	        O(1)
+__________________________________________________________________________________________________________________________________________
+size e capacity — como o vetor cresce
+
+    vector<int> v;
+    cout << v.size()     << " "
+        << v.capacity() << endl;  // 0 0
+
+    for (int i = 0; i < 5; i++) {
+    v.push_back(i);
+    cout << "size=" << v.size()
+        << "  cap=" << v.capacity() << endl;
+    }
+    // size=1  cap=1
+    // size=2  cap=2
+    // size=3  cap=4  ← realocou
+    // size=4  cap=4
+    // size=5  cap=8  ← realocou
+
+    // reserve evita realocações quando se sabe o tamanho final
+    vector<int> w;
+    w.reserve(1000);          // aloca de uma vez — sem realocações no loop
+    for (int i = 0; i < 1000; i++)
+    w.push_back(i);
+__________________________________________________________________________________________________________________________________________
+begin() e end() — iteradores e onde eles aparecem
+
+- OBS: O end() aponta para DEPOIS do últmo elemento
+    // v = { 10, 20, 30, 40, 50 }
+    //        ↑                    ↑
+    //     begin()              end()  (fora do vetor)
+
+
+Código
+
+    vector<int> v = { 10, 20, 30, 40, 50 };
+
+    // ── Iteração manual ───────────────────────────────────────────────
+    for ( auto it = v.begin(); it != v.end(); ++it )
+    cout << *it << " ";    // 10 20 30 40 50
+
+    // ── Range-for — açúcar sintático para o loop acima ────────────────
+    for ( auto x : v )
+    cout << x << " ";        // idêntico ao loop acima
+
+    // ── Algoritmos STL ────────────────────────────────────────────────
+    // A grande maioria recebe um par (begin, end) como intervalo
+    sort     ( v.begin(), v.end() );
+    reverse  ( v.begin(), v.end() );
+    for_each ( v.begin(), v.end(), []( int x ){ cout << x << " "; } );
+    count_if ( v.begin(), v.end(), []( int x ){ return x > 20; } );
+
+    // ── Operações com posição ─────────────────────────────────────────
+    v.insert( v.begin(),      99 );  // insere 99 no início
+    v.insert( v.begin() + 2, 55 );  // insere 55 na posição 2
+    v.erase( v.begin() );          // remove o primeiro
+    v.erase( v.end() - 1 );       // remove o último
+
+    // ── Subintervalo — begin/end não precisam ser do vetor inteiro ─────
+    sort( v.begin() + 1, v.end() - 1 );  // ordena apenas do índice 1 ao penúltimo
+
+    // Iteração reversa
+    for ( auto it = v.rbegin(); it != v.rend(); ++it )
+    cout << *it << " ";    // percorre de trás para frente
+
+    // std::begin / std::end — versão livre que funciona também para arrays C
+    int arr[] = { 3, 1, 4 };
+    sort( std::begin(arr), std::end(arr) );  // funciona!
+
+
+
+    Método	                                    Descrição
+begin() / end()	        Iteradores mutáveis — permitem modificar os elementos
+cbegin() / cend()	    Iteradores constantes — leitura apenas, mesmo sobre vetor não-const
+rbegin() / rend()	    Iteradores reversos — percorrem do último para o primeiro
+crbegin() / crend()	    Constantes e reversos combinados
+__________________________________________________________________________________________________________________________________________
+
+__________________________________________________________________________________________________________________________________________
+
+__________________________________________________________________________________________________________________________________________
+
+__________________________________________________________________________________________________________________________________________
+
+__________________________________________________________________________________________________________________________________________
