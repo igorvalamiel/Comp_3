@@ -1,0 +1,53 @@
+Teste 1
+    --- Input ---
+    print( cout, { { "jan", 1 }, { string( "pi" ), 3.14 } } );
+
+    --- Expected output (exact text)---
+    jan = 1
+    pi = 3.14
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+Teste 2
+    --- Input ---
+    print( cout, { { "jan", 1 }, { 2, "fev" }, { string( "pi" ), 3.14 } } );
+
+    --- Expected output (exact text)---
+    jan = 1
+    2 = fev
+    pi = 3.14
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+Teste 3
+    --- Input ---
+    print( cout, { { "jan", 1 }, { 2, "fev" }, { "lista", vector<int>{ 1, 2, 3 } }, { 1, 2 }, { 1.1, 2.2} } );
+
+    --- Expected output (exact text)---
+    jan = 1
+    2 = fev
+    lista = [ 1 2 3 ]
+    1 = 2
+    1.1 = 2.2
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+Teste 4
+    --- Input ---
+    Pair p{ "1", "2" };
+    print( cout, { { "jan", 1 }, { string( "pi" ), 3.14 }, p } );
+
+    --- Expected output (exact text)---
+    jan = 1
+    pi = 3.14
+    1 = 2
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+Teste 5
+    --- Input ---
+    stringstream buf;
+    print( buf, { { "jan", 1 }, { 2, "fev" }, { "lista", vector<int>{ 1, 2, 3 } }, { 1, 2 }, { 1.1, 2.2} } );
+    cout << "Inicio\n" << buf.str() << "Fim" << endl;
+
+    --- Expected output (exact text)---
+    Inicio
+    jan = 1
+    2 = fev
+    lista = [ 1 2 3 ]
+    1 = 2
+    1.1 = 2.2
+    Fim
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
