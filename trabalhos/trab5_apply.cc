@@ -6,7 +6,9 @@
 
 using namespace std;
 
-template <typename T>
 auto apply(auto lista, auto F) {
+    
+    auto Func(auto L) -> decltype(F);
 
+    return Func(lista);
 }
