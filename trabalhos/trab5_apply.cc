@@ -1,0 +1,12 @@
+#include <vector>
+#include <iostream>
+#include <string>
+#include <map>
+#include <initializer_list>
+
+using namespace std;
+
+template <typename T>
+auto apply(auto lista, auto F) {
+
+}

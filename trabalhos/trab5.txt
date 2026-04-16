@@ -1,0 +1,81 @@
+Teste 1
+    --- Input ---
+    vector<int> v{ 1, 2, 3, 4, 5 };
+    vector<int> r = ::apply( v, id );
+    cout << r;
+    
+    --- Expected output (exact text)---
+    [ 1 2 3 4 5 ]
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+Teste 2
+    --- Input ---
+    vector<int> v{ 1, 2, 3, 4, 5 };
+    vector<double> r = ::apply( v, seno );
+    cout << r;
+    
+    --- Expected output (exact text)---
+    [ 0.841471 0.909297 0.14112 -0.756802 -0.958924 ]
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+Teste 3
+    --- Input ---
+    auto v = { 1, 2, 3, 4, 5 };
+    cout << ::apply( v, []( auto n ) -> double { return n*n + 0.1; } );
+    
+    --- Expected output (exact text)---
+    [ 1.1 4.1 9.1 16.1 25.1 ]
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+Teste 4
+    --- Input ---
+    auto m = vector{ vector{ 1, 3 }, { 4, 15 }, { 3, 10 } };
+    cout << ::apply( m, []( auto lin ) { return lin[0]*lin[0] - lin[1]; } );
+
+    --- Expected output (exact text)---
+    [ -2 1 -1 ]
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+Teste 5
+    --- Input ---
+    auto a = { 1, 2 }, b = { 3, 4 };
+    cout << ::apply( a, [b]( auto x ) { return ::apply( b, [x]( auto y ){ return vector{ x, y }; } ); } );
+
+    --- Expected output (exact text)---
+    [ [ [ 1 3 ] [ 1 4 ] ] [ [ 2 3 ] [ 2 4 ] ] ]
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+Teste 6
+    --- Input ---
+    cout << ::apply( vector{ 1, 2, 3 }, FunctorSimples() );
+
+    --- Expected output (exact text)---
+    [ I! II! III! ]
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+Teste 7
+    --- Input ---
+    cout << ::apply( vector{ 1, 2, 3 }, FunctorTemplate() ) << ::apply( vector<string>{ "a", "b", "c" }, FunctorTemplate() );
+
+    --- Expected output (exact text)---
+    [ 2 4 6 ][ aa bb cc ]
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+Teste 8
+    --- Input ---
+    cout << ::apply( { 1, 2, 3, 4, 5 }, roman );
+
+    --- Expected output (exact text)---
+    [ I II III IV V ]
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+Teste 9
+    --- Input ---
+    int v[] = { 1, 2, 3, 4, 5 };
+    vector<int> r = ::apply( v, id );
+    cout << r;
+
+    --- Expected output (exact text)---
+    [ 1 2 3 4 5 ]
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+Teste 10
+    --- Input ---
+    int v[] = { 1, 2, 3, 4, 5 };
+    vector<string> r = ::apply( v, roman );
+    cout << r;
+
+    --- Expected output (exact text)---
+    [ I II III IV V ]
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
