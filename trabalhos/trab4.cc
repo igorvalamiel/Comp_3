@@ -5,7 +5,7 @@ using namespace std;
 
 class AbstractPair {
   public:
-    virtual void imprime () {}
+    virtual string imprime () {}
     virtual ~AbstractPair() {}
   private:
 };
@@ -13,7 +13,7 @@ class AbstractPair {
 template <typename A, typename B>
 class ImplPair : public AbstractPair {
   public:
-    auto imprime () {
+    string imprime () {
       return a << " = " << b;    
     }
   private:
@@ -28,7 +28,7 @@ class Pair {
       p = new ImplPair<A, B>(a, b);
     }
 
-    auto imprime_pair() {
+    string imprime_pair() {
       return p->imprime();
     }
 
