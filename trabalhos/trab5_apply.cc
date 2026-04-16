@@ -12,6 +12,7 @@ auto apply(vector<T> lista, auto F) {
     using tipo = decltype(F(lista[0]));
 
     vector <tipo> res;
+    
     for (auto i : lista){
         res.push_back(F(i));
     }

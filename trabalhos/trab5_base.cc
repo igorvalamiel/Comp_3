@@ -30,7 +30,7 @@ ostream& operator << ( ostream& o, const vector<T>& v ) {
     o << "[ ";
     for( auto x : v )
         o << x << " ";
-        
+    
     return o << "]";
 }
 
