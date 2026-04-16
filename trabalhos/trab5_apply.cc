@@ -20,6 +20,7 @@ auto apply(const vector<T>& lista, Funct F) {
     return res;
 }
 
+//usando opção para "escolha" automatica do tipo
 template <typename L, typename Funct>
 auto apply(const L& lista, Funct F) {
     
