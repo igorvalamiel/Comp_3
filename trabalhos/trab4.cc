@@ -1,5 +1,6 @@
 #include <initializer_list>
 #include <iostream>
+#include <vector>
 
 using namespace std;
 
@@ -41,7 +42,6 @@ class Pair {
 
   private:
     AbstractPair *p;
-    string valor;
 };
 
 void print( ostream& o, initializer_list<Pair> lista ) {
@@ -54,7 +54,7 @@ int main() {
  
     Pair p( "1", 2 );
   
-    print( cout, { { "jan", 1 }, { 2, "fev" }, { string( "pi" ), 3.14 } } );
+    print( cout, { { "jan", 1 }, { 2, "fev" }, { "lista", vector<int>{ 1, 2, 3 } }, { 1, 2 }, { 1.1, 2.2} } );
 
   return 0;  
 }
