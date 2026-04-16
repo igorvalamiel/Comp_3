@@ -28,8 +28,10 @@ auto apply(const L& lista, Funct F) {
 
     vector <tipo> res;
 
-    for (auto i : lista){
-        res.push_back(F(i));
+    if (decltype(F(lista.begin())) == decltype(apply(lista, F))){
+        for (auto i : lista){
+            res.push_back(F(i));
+        }
     }
 
     return res;
