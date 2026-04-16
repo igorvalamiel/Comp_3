@@ -7,7 +7,7 @@
 using namespace std;
 
 template <typename T, typename Funct>
-auto apply(const vector<T>& lista, Funct F) {
+auto apply(const T& lista, Funct F) {
     
     using tipo = decltype(F(lista[0]));
 
