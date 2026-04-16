@@ -21,17 +21,15 @@ auto apply(const vector<T>& lista, Funct F) {
 }
 
 //usando opção para "escolha" automatica do tipo
-template <typename L, typename Funct>
-auto apply(const L& lista, Funct F) {
+template <typename T, typename Funct>
+auto apply(const initializer_list<T>& lista, Funct F) {
     
-    using tipo = decltype(F(lista.begin()));
+    using tipo = decltype(F(*lista.begin()));
 
     vector <tipo> res;
 
-    if (decltype(F(lista.begin())) == decltype(apply(lista, F))){
-        for (auto i : lista){
-            res.push_back(F(i));
-        }
+    for (auto i : lista){
+        res.push_back(F(i));
     }
 
     return res;
