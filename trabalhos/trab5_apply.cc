@@ -6,13 +6,13 @@
 
 using namespace std;
 
-template <typename T>
-auto apply(vector<T> lista, auto F) {
+template <typename T, typename Funct>
+auto apply(vector<T> lista, Funct F) {
     
     using tipo = decltype(F(lista[0]));
 
     vector <tipo> res;
-    
+
     for (auto i : lista){
         res.push_back(F(i));
     }

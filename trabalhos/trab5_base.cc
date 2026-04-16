@@ -36,9 +36,8 @@ ostream& operator << ( ostream& o, const vector<T>& v ) {
 
 int main( int argc, char* argv[]) {     
 
-    vector<int> v{ 1, 2, 3, 4, 5 };
-    vector<int> r = ::apply( v, id );
-    cout << r;
+    auto v = { 1, 2, 3, 4, 5 };
+    cout << ::apply( v, []( auto n ) -> double { return n*n + 0.1; } );
 
     return 0;
 }
