@@ -79,3 +79,10 @@ Teste 10
     --- Expected output (exact text)---
     [ I II III IV V ]
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+
+
+
+
+
+g++ -std=c++20 -o trab5_apply trab5_apply.cc
