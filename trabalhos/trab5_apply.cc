@@ -20,6 +20,20 @@ auto apply(const vector<T>& lista, Funct F) {
     return res;
 }
 
+template <typename L, typename Funct>
+auto apply(const L& lista, Funct F) {
+    
+    using tipo = decltype(F(lista.begin()));
+
+    vector <tipo> res;
+
+    for (auto i : lista){
+        res.push_back(F(i));
+    }
+
+    return res;
+}
+
 //int main() {
 //    return 0;
 //}
