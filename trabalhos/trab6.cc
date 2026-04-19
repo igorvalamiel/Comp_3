@@ -20,6 +20,16 @@ class Vetor {
             return *this;
         };
 
+        const Vetor operator + (Vetor<n, T> outro){
+            Vetor <n,T> resultado;
+
+            for (int i=0; i<n; i++){
+                resultado.vetor_v[i] = this->vetor_v[i] + outro.vetor_v[i];
+            }
+
+            return resultado;
+        }
+
         // isso aqui deixa o programa ler com o auto i : vetor
         const T* begin() const { return &vetor_v[0]; }
         const T* end() const { return &vetor_v[n]; }
@@ -45,14 +55,11 @@ int main( int argc, char* argv[]) {
     cin >> caso >> x >> y >> z;
     a = { x, y, z };
     b = { 1, 2, 3 };
-
-    cout << a << endl;
-    cout << b << endl;
     
-    /*
     switch( caso ) {
         case 1: cout << a << endl; break;
         case 2: cout << a + b << endl; break;
+        /*
         case 3: {
             Vetor< 3, double> c;
             c = a ** b; 
@@ -63,8 +70,8 @@ int main( int argc, char* argv[]) {
         case 5: cout << a * 3.0 << endl; break;
         case 6: cout << 2.1 * a << endl; break;
         case 7: cout << a + b + a * 2.0 << endl; break;
+        */
     }
-    */
   
   return 0;
 }
