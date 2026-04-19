@@ -11,6 +11,14 @@ class Vetor {
 
         virtual ~Vetor(){}
 
+        const Vetor& operator = (initializer_list<T> valores){
+            int i = 0;
+            for (auto item : valores){
+                vetor_v[i] = item;
+                i++;
+            }
+        }
+
     private:
         int dim = n; //dimensões do vetor
         T vetor_v[n]; //criando vetor em si
@@ -18,13 +26,17 @@ class Vetor {
 
 int main( int argc, char* argv[]) {
     Vetor< 3, double> a, b;
-    /*
+    
     int caso;
     double x, y, z;
     
     cin >> caso >> x >> y >> z;
     a = { x, y, z };
     b = { 1, 2, 3 };
+
+    //cout << a << endl;
+    
+    /*
     switch( caso ) {
         case 1: cout << a << endl; break;
         case 2: cout << a + b << endl; break;
