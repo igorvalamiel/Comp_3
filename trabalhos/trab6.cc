@@ -5,6 +5,22 @@ using namespace std;
 template <int n, typename T>
 class Vetor {
     public:
+
+        class MeioDaOperacao {
+            private:
+                // Construtor privado — só Vetor pode criar o proxy
+                MeioDaOperacao( Vetor* v ) : vetor(v) {}
+                friend class Vetor;   // Vetor enxerga o construtor privado
+
+            public:
+                MeioDaOperacao operator * ( Vetor v ) {
+                    return *this;        // retorna o mesmo proxy para encadear
+                }
+
+            private:
+                Vetor* vetor;
+        };
+
         Vetor() {
             cout << "vetor construido" << endl;
         }
@@ -64,6 +80,15 @@ class Vetor {
             return resultado;
         }
 
+        // produto vetorial
+        const MeioDaOperacao operator * (const Vetor outro) const {
+            MeioDaOperacao meio;
+
+            vec_aux = outro;
+
+            return MeioDaOperacao(this);
+        }
+
         // isso aqui deixa o programa ler com o auto i : vetor
         const T* begin() const { return &vetor_v[0]; }
         const T* end() const { return &vetor_v[n]; }
@@ -71,7 +96,9 @@ class Vetor {
     private:
         int dim = n; //dimensões do vetor
         T vetor_v[n]; //criando vetor em si
+        Vetor<n,T> vec_aux;
 };
+
 
 template <int N, typename T, template<int, typename> class Estrutura>
 ostream& operator << (ostream& o, const Estrutura<N,T>& col) {
