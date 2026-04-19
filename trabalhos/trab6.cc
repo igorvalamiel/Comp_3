@@ -42,7 +42,7 @@ class Vetor {
             return resultado;
         }
 
-        // produto escalar
+        // produto vetor*vetor
         int operator * (Vetor<n, T> outro){
             auto x = 0;
 
@@ -51,6 +51,17 @@ class Vetor {
             }
 
             return x;
+        }
+
+        // produto vetor*double
+        const Vetor operator * (double num){
+            Vetor <n,T> resultado;
+
+            for (int i=0; i<n; i++){
+                resultado.vetor_v[i] = this->vetor_v[i] * num;
+            }
+
+            return resultado;
         }
 
         // isso aqui deixa o programa ler com o auto i : vetor
@@ -90,8 +101,8 @@ int main( int argc, char* argv[]) {
             break; 
         }*/
         case 4: cout << a * b << endl; break;
-        /*
         case 5: cout << a * 3.0 << endl; break;
+        /*
         case 6: cout << 2.1 * a << endl; break;
         case 7: cout << a + b + a * 2.0 << endl; break;
         */
