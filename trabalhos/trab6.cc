@@ -19,10 +19,27 @@ class Vetor {
             }
         }
 
+        ostream get_values(){
+            ostream s;
+            for (auto i : vetor_v){
+                s << i << " ";
+            }
+            return s;
+        }
+
     private:
         int dim = n; //dimensões do vetor
         T vetor_v[n]; //criando vetor em si
 };
+
+// ajustando o operador <<
+template <int n, typename T>
+std::ostream& operator<<(std::ostream& o, Vetor<n, T>& v) {
+    
+    o << v.get_values();
+    
+    return o;
+}
 
 int main( int argc, char* argv[]) {
     Vetor< 3, double> a, b;
@@ -34,7 +51,7 @@ int main( int argc, char* argv[]) {
     a = { x, y, z };
     b = { 1, 2, 3 };
 
-    //cout << a << endl;
+    cout << b << endl;
     
     /*
     switch( caso ) {
