@@ -20,6 +20,7 @@ class Vetor {
             return *this;
         };
 
+        // soma
         const Vetor operator + (Vetor<n, T> outro){
             Vetor <n,T> resultado;
 
@@ -28,6 +29,28 @@ class Vetor {
             }
 
             return resultado;
+        }
+
+        //subtação
+        const Vetor operator - (Vetor<n, T> outro){
+            Vetor <n,T> resultado;
+
+            for (int i=0; i<n; i++){
+                resultado.vetor_v[i] = this->vetor_v[i] - outro.vetor_v[i];
+            }
+
+            return resultado;
+        }
+
+        // produto escalar
+        int operator * (Vetor<n, T> outro){
+            auto x = 0;
+
+            for (int i=0; i<n; i++){
+                x += this->vetor_v[i] * outro.vetor_v[i];
+            }
+
+            return x;
         }
 
         // isso aqui deixa o programa ler com o auto i : vetor
@@ -65,8 +88,9 @@ int main( int argc, char* argv[]) {
             c = a ** b; 
             cout << c << endl;
             break; 
-        }
+        }*/
         case 4: cout << a * b << endl; break;
+        /*
         case 5: cout << a * 3.0 << endl; break;
         case 6: cout << 2.1 * a << endl; break;
         case 7: cout << a + b + a * 2.0 << endl; break;
