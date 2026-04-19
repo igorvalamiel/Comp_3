@@ -16,30 +16,25 @@ class Vetor {
             for (auto item : valores){
                 vetor_v[i] = item;
                 i++;
-            }
-        }
+            };
+            return *this;
+        };
 
-        ostream get_values(){
-            ostream s;
-            for (auto i : vetor_v){
-                s << i << " ";
-            }
-            return s;
-        }
+        // isso aqui deixa o programa ler com o auto i : vetor
+        const T* begin() const { return &vetor_v[0]; }
+        const T* end() const { return &vetor_v[n]; }
 
     private:
         int dim = n; //dimensões do vetor
         T vetor_v[n]; //criando vetor em si
 };
 
-// ajustando o operador <<
-template <int n, typename T>
-std::ostream& operator<<(std::ostream& o, Vetor<n, T>& v) {
-    
-    o << v.get_values();
-    
+template <int N, typename T, template<int, typename> class Estrutura>
+ostream& operator << (ostream& o, const Estrutura<N,T>& col) {
+    for(auto x : col)
+        o << x << " ";
     return o;
-}
+};
 
 int main( int argc, char* argv[]) {
     Vetor< 3, double> a, b;
@@ -51,6 +46,7 @@ int main( int argc, char* argv[]) {
     a = { x, y, z };
     b = { 1, 2, 3 };
 
+    cout << a << endl;
     cout << b << endl;
     
     /*
