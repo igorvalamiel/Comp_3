@@ -1,9 +1,19 @@
 #include <iostream>
+#include <vector>
 using namespace std;
 
-template <typename n, typename T>
-class Vetor : public vector<int, T> {
+template <int n, typename T>
+class Vetor {
+    public:
+        Vetor() {
+            cout << "vetor construido" << endl;
+        }
 
+        virtual ~Vetor(){}
+
+    private:
+        int dim = n; //dimensões do vetor
+        T vetor_v[n]; //criando vetor em si
 };
 
 int main( int argc, char* argv[]) {
