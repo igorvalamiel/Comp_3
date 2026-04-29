@@ -1,0 +1,94 @@
+Teste 1
+    --- Input ---
+    print( cout, { { "jan", Leak() }, { string( "pi" ), Leak() } } );
+
+    --- Expected output (exact text)---
+    Criou: 1
+    Criou: 2 copiando de 1
+    Criou: 3
+    Criou: 4 copiando de 3
+    jan = lk(2)
+    pi = lk(4)
+    Destruiu: 4
+    Destruiu: 2
+    Destruiu: 3
+    Destruiu: 1
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+Teste 2
+    --- Input ---
+    Leak *l = new Leak[2];
+    print( cout, { { "jan", l[0] }, { string( "pi" ), l[1] } } );
+    delete [] l;
+
+    --- Expected output (exact text)---
+    Criou: 1
+    Criou: 2
+    Criou: 3 copiando de 1
+    Criou: 4 copiando de 3
+    Criou: 5 copiando de 2
+    Criou: 6 copiando de 5
+    jan = lk(4)
+    pi = lk(6)
+    Destruiu: 6
+    Destruiu: 4
+    Destruiu: 5
+    Destruiu: 3
+    Destruiu: 2
+    Destruiu: 1
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+Teste 3
+    --- Input ---
+    shared_ptr<Leak> l ( new Leak() );
+    print( cout, { { "jan", *l }, { string( "pi" ), *l } } );
+
+    --- Expected output (exact text)---
+    Criou: 1
+    Criou: 2 copiando de 1
+    Criou: 3 copiando de 2
+    Criou: 4 copiando de 1
+    Criou: 5 copiando de 4
+    jan = lk(3)
+    pi = lk(5)
+    Destruiu: 5
+    Destruiu: 3
+    Destruiu: 4
+    Destruiu: 2
+    Destruiu: 1
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+Teste 4
+    --- Input ---
+    Leak a, b, c;
+    vector<Leak> v = { a, b };
+    print( cout, { { "v", v }, { "c", c } } );
+
+    --- Expected output (exact text)---
+    Criou: 1
+    Criou: 2
+    Criou: 3
+    Criou: 4 copiando de 1
+    Criou: 5 copiando de 2
+    Criou: 6 copiando de 4
+    Criou: 7 copiando de 5
+    Destruiu: 5
+    Destruiu: 4
+    Criou: 8 copiando de 6
+    Criou: 9 copiando de 7
+    Criou: 10 copiando de 8
+    Criou: 11 copiando de 9
+    Criou: 12 copiando de 3
+    Criou: 13 copiando de 12
+    v = [ lk(10) lk(11) ]
+    c = lk(13)
+    Destruiu: 13
+    Destruiu: 10
+    Destruiu: 11
+    Destruiu: 12
+    Destruiu: 8
+    Destruiu: 9
+    Destruiu: 6
+    Destruiu: 7
+    Destruiu: 3
+    Destruiu: 2
+    Destruiu: 1
+
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
