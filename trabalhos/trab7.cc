@@ -1,5 +1,3 @@
-#include <initializer_list>
-#include <iostream>
 using namespace std;
 
 class AbstractPair {
@@ -12,10 +10,7 @@ class AbstractPair {
 template <typename A, typename B>
 class ImplPair : public AbstractPair {
   public:
-    ImplPair (A x, B y){
-      a = x;
-      b = y;
-    }
+    ImplPair(A&& x, B&& y) : a(forward<A>(x)), b(forward<B>(y)) {}
 
     virtual ~ImplPair() {}
 
@@ -30,25 +25,20 @@ class ImplPair : public AbstractPair {
 class Pair {
   public:
     template <typename A, typename B>
-    Pair( A a, B b ) {
-      p = new ImplPair<A, B>(a, b);
+    Pair(A&& a, B&& b) {
+      p = make_unique<ImplPair<A, B>>(forward<A>(a), forward<B>(b));
     }
 
-    void imprime_pair(ostream& o) {
+    void imprime_pair(ostream& o) const {
       return p->imprime(o);
     }
 
   private:
-    AbstractPair *p;
+    unique_ptr<AbstractPair> p;
 };
 
 void print( ostream& o, initializer_list<Pair> lista ) {
-  for (auto i : lista) {
+  for (const auto& i : lista) {
     i.imprime_pair(o);
   }
-}
-
-int main() {  
-    print( cout, { { "jan", 1 }, { string( "pi" ), 3.14 } } );
-    return 0; 
 }
