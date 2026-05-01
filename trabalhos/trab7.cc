@@ -1,3 +1,5 @@
+using namespace std;
+
 class AbstractPair {
   public:
     virtual void imprime (ostream& o) {}
@@ -32,6 +34,10 @@ class Pair {
 
     void imprime_pair(ostream& o) {
       return p->imprime(o);
+    }
+
+    virtual ~Pair() {
+      delete p;
     }
 
   private:
