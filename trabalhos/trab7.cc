@@ -2,7 +2,8 @@ using namespace std;
 
 class AbstractPair {
   public:
-    virtual void imprime (ostream& o) {}
+    virtual void imprime (ostream& o) const {}
+    virtual unique_ptr<AbstractPair> clone() const = 0;
     virtual ~AbstractPair() {}
   private:
 };
@@ -17,9 +18,14 @@ class ImplPair : public AbstractPair {
 
     virtual ~ImplPair() {}
 
-    void imprime (ostream& o) {
+    void imprime (ostream& o) const override {
       o << a << " = " << b << endl;    
     }
+
+    unique_ptr<AbstractPair> clone() const override {
+      return make_unique<ImplPair<A, B>>(a, b);
+    }
+
   private:
     A a;
     B b;
@@ -30,6 +36,10 @@ class Pair {
     template <typename A, typename B>
     Pair( A a, B b ) {
       p = make_unique<ImplPair<A, B>>(a, b);
+    }
+
+    Pair( const Pair& other) {
+      p = other.p->clone();
     }
 
     void imprime_pair(ostream& o) const {
