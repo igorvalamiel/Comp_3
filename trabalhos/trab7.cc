@@ -10,11 +10,12 @@ class AbstractPair {
 
 template <typename A, typename B>
 class ImplPair : public AbstractPair {
+  using DA = decay_t<A>;
+  using DB = decay_t<B>;
   public:
-    ImplPair (A x, B y){
-      a = x;
-      b = y;
-    }
+    ImplPair (A&& x, B&& y) : a(forward<A>(x)), b(forward<B>(y)) {}
+
+    ImplPair(const DA& x, const DB& y) : a(x), b(y) {}
 
     virtual ~ImplPair() {}
 
@@ -23,23 +24,19 @@ class ImplPair : public AbstractPair {
     }
 
     unique_ptr<AbstractPair> clone() const override {
-      return make_unique<ImplPair<A, B>>(a, b);
+      return make_unique<ImplPair<DA, DB>>(a, b);
     }
 
   private:
-    A a;
-    B b;
+    DA a;
+    DB b;
 };
 
 class Pair {
   public:
     template <typename A, typename B>
-    Pair( A a, B b ) {
-      p = make_unique<ImplPair<A, B>>(a, b);
-    }
-
-    Pair( const Pair& other) {
-      p = other.p->clone();
+    Pair(A&& a, B&& b) {
+        p = make_unique<ImplPair<A, B>>(forward<A>(a), forward<B>(b));
     }
 
     void imprime_pair(ostream& o) const {
@@ -52,7 +49,7 @@ class Pair {
     unique_ptr<AbstractPair> p;
 };
 
-void print( ostream& o, initializer_list<Pair> lista ) {
+void print( ostream& o, const initializer_list<Pair>& lista ) {
   for (auto& i : lista) {
     i.imprime_pair(o);
   }
