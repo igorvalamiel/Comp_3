@@ -30,7 +30,7 @@ class ImplPair : public AbstractPair {
 class Pair {
   public:
     template <typename A, typename B>
-    Pair(const A& a, const B& b) {
+    Pair( const A& a, const B& b) {
       using DA = decay_t<A>;
       using DB = decay_t<B>;
       p = make_unique<ImplPair<DA, DB>>(a, b);
