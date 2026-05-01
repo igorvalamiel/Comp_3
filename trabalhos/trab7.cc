@@ -32,7 +32,7 @@ class Pair {
       p = new ImplPair<A, B>(a, b);
     }
 
-    void imprime_pair(ostream& o) {
+    void imprime_pair(ostream& o) const {
       return p->imprime(o);
     }
 
@@ -45,7 +45,7 @@ class Pair {
 };
 
 void print( ostream& o, initializer_list<Pair> lista ) {
-  for (auto i : lista) {
+  for (auto& i : lista) {
     i.imprime_pair(o);
   }
 }
