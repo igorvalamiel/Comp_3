@@ -43,6 +43,14 @@ class Pair {
       return p->imprime(o);
     }
 
+    Pair(const Pair& other) {
+      p = other.p->clone();
+    }
+
+    Pair(Pair&& other) {
+      p = other.p->clone();
+    }
+
     virtual ~Pair() {}
 
   private:
