@@ -29,19 +29,17 @@ class Pair {
   public:
     template <typename A, typename B>
     Pair( A a, B b ) {
-      p = new ImplPair<A, B>(a, b);
+      p = make_unique<ImplPair<A, B>>(a, b);
     }
 
     void imprime_pair(ostream& o) const {
       return p->imprime(o);
     }
 
-    virtual ~Pair() {
-      delete p;
-    }
+    virtual ~Pair() {}
 
   private:
-    AbstractPair *p;
+    unique_ptr<AbstractPair> p;
 };
 
 void print( ostream& o, initializer_list<Pair> lista ) {
