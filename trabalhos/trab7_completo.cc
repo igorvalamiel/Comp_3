@@ -1,8 +1,47 @@
 #include <initializer_list>
 #include <iostream>
 #include <memory>
+#include <vector>
 
 using namespace std;
+
+class Leak {
+    public:
+        Leak(): n( ++contador ) {
+            cout << "Criou: " << n << endl;
+        }
+        
+        Leak( const Leak& p ): n( ++contador ) {
+            cout << "Criou: " << n << " copiando de " << p.n << endl;
+        }
+        
+        ~Leak() {
+            cout << "Destruiu: " << n << endl;
+        }
+        
+        ostream& print( ostream& o ) const {
+            return o << "lk(" << n << ")";
+        }
+        
+    private:
+        static int contador;
+        int n;
+};
+
+int Leak::contador = 0;
+
+ostream& operator << ( ostream& o, const Leak& v ) {
+    return v.print( o ); 
+}
+
+template <typename T>
+ostream& operator << ( ostream& o, const vector<T>& v ) {
+    o << "[ ";
+    for( auto& x : v )
+      o << x << " ";
+      
+    return o << "]";
+}
 
 class AbstractPair {
   public:
@@ -69,9 +108,7 @@ void print( ostream& o, const initializer_list<Pair>& lista ) {
 
 int main() {
  
-    Pair p( "1", 2 );
-  
-    print( cout, { { "jan", 1 }, { 2, "fev" }, { string( "pi" ), 3.14 } } );
+    print( cout, { { "jan", Leak() }, { string( "pi" ), Leak() } } );
 
   return 0;  
 }
