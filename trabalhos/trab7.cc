@@ -13,8 +13,6 @@ class ImplPair : public AbstractPair {
   using DA = decay_t<A>;
   using DB = decay_t<B>;
   public:
-    ImplPair (A&& x, B&& y) : a(forward<A>(x)), b(forward<B>(y)) {}
-
     ImplPair(const DA& x, const DB& y) : a(x), b(y) {}
 
     virtual ~ImplPair() {}

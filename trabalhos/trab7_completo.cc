@@ -56,8 +56,6 @@ class ImplPair : public AbstractPair {
   using DA = decay_t<A>;
   using DB = decay_t<B>;
   public:
-    ImplPair (A&& x, B&& y) : a(forward<A>(x)), b(forward<B>(y)) {}
-
     ImplPair(const DA& x, const DB& y) : a(x), b(y) {}
 
     virtual ~ImplPair() {}
@@ -107,8 +105,21 @@ void print( ostream& o, const initializer_list<Pair>& lista ) {
 }
 
 int main() {
- 
+
+    cout << "==========================================================================" << endl;
     print( cout, { { "jan", Leak() }, { string( "pi" ), Leak() } } );
+    cout << "==========================================================================" << endl;
+    Leak *l = new Leak[2];
+    print( cout, { { "jan", l[0] }, { string( "pi" ), l[1] } } );
+    delete [] l;
+    cout << "==========================================================================" << endl;
+    shared_ptr<Leak> l2 ( new Leak() );
+    print( cout, { { "jan", *l2 }, { string( "pi" ), *l2 } } );
+    cout << "==========================================================================" << endl;
+    Leak a, b, c;
+    vector<Leak> v = { a, b };
+    print( cout, { { "v", v }, { "c", c } } );
+    cout << "==========================================================================" << endl;
 
   return 0;  
 }
