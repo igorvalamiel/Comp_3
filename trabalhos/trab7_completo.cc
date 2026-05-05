@@ -53,53 +53,52 @@ class AbstractPair {
 
 template <typename A, typename B>
 class ImplPair : public AbstractPair {
-  using DA = decay_t<A>;
-  using DB = decay_t<B>;
   public:
-    ImplPair(const DA& x, const DB& y) : a(x), b(y) {}
+    template <typename A2, typename B2>
+    ImplPair(A2&& x, B2&& y)
+        : a(forward<A2>(x)), b(forward<B2>(y)) {}
 
-    virtual ~ImplPair() {}
+    ImplPair(const A& x, const B& y)
+        : a(x), b(y) {}
 
     void imprime (ostream& o) const override {
-      o << a << " = " << b << endl;    
+        o << a << " = " << b << endl;
     }
 
     unique_ptr<AbstractPair> clone() const override {
-      return make_unique<ImplPair<DA, DB>>(a, b);
+        return make_unique<ImplPair<A, B>>(a, b);
     }
 
   private:
-    DA a;
-    DB b;
+    A a;
+    B b;
 };
 
 class Pair {
   public:
     template <typename A, typename B>
     Pair(A&& a, B&& b) {
-        p = make_unique<ImplPair<A, B>>(forward<A>(a), forward<B>(b));
-    }
-
-    void imprime_pair(ostream& o) const {
-      return p->imprime(o);
+        p = make_unique<ImplPair<decay_t<A>, decay_t<B>>>(
+            forward<A>(a), forward<B>(b)
+        );
     }
 
     Pair(const Pair& other) {
-      p = other.p->clone();
+        p = other.p->clone();
     }
 
-    Pair(Pair&& other) {
-      p = other.p->clone();
-    }
+    Pair(Pair&& other) = delete;
 
-    virtual ~Pair() {}
+    void imprime_pair(ostream& o) const {
+        p->imprime(o);
+    }
 
   private:
     unique_ptr<AbstractPair> p;
 };
 
 void print( ostream& o, const initializer_list<Pair>& lista ) {
-  for (auto& i : lista) {
+  for (const auto& i : lista) {
     i.imprime_pair(o);
   }
 }
