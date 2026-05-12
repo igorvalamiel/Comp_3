@@ -1,0 +1,52 @@
+invoke <F, obj> : usar para englobar metodos
+
+------------------------------------------------------------------------------------------------
+
+
+class Var {
+    public:
+        double e(double v) const {return v;}
+        double dx(double v) const {return 1;}
+};
+
+class Cte {
+    public:
+        double e(double v) const {return v;}
+        double dx(double v) const {return 0;}
+};
+
+// criar class Cte para quando tiver  f = x + 7 e quiser f'
+
+Var x;
+
+template <typename F, typename G>
+class Adicao {
+    public:
+        Adicao(const F& f, const G& g): f(f), g(g) {}
+
+        double e(double v) const {return f.e(v) + g.e(v);}
+        double dx(double v) const {return f.dx(v) + g.dx(v);}
+    
+    private:
+        F f;
+        G g;
+};
+
+template <typename F, typename G>
+auto operator + (const F& f, const G& g) {
+    return Adicao{f, g};
+}
+
+template <typename F, typename G>
+auto operator + (const F& f, auto g) {
+    return Adicao{f, Cte(g)};
+}
+
+int main(){
+
+    auto f = x + x;
+    int v = 8;
+    cout << "f(" << v << ") = " << f.e(v) << "\n f'(" << v << ") = " << f.dx(v) << endl;
+
+    return 0;
+}
