@@ -1,0 +1,92 @@
+g++ -std=c++20 -o trab10 trab10.cc
+
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+Teste 1
+    --- Input ---
+    double v = 5.1;
+    auto f = 3.0 * x * x;
+
+    --- Expected output (text)---
+    f(5.1)=78.03, f'(5.1)=30.6
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+Teste 2
+    --- Input ---
+    double v = 1.1;
+    auto f = x*x*( x + 8.0 ) + x;
+
+    --- Expected output (text)---
+    f(1.1)=12.111, f'(1.1)=22.23
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+Teste 3
+    --- Input ---
+    double v = 0.5;
+    auto f = sin( x * x * cos( 3.14 * x + 1.0 ) );
+
+    --- Expected output (text)---
+    f(0.5)=-0.208714, f'(0.5)=-1.23783
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+Teste 4
+    --- Input ---
+    double v = 3.14;
+    auto f = sin( x * x - cos( 3.14 * x + 1.0 ) );
+
+    --- Expected output (text)---
+    f(3.14)=-0.53995, f'(3.14)=-2.66732
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+Teste 5
+    --- Input ---
+    double v = 3.14159;
+    auto f =  sin(x)/cos(x);
+
+    --- Expected output (text)---
+    f(3.14159)=-2.65359e-06, f'(3.14159)=1
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+Teste 6
+    --- Input ---
+    double v = -7.3;
+    auto f = x->*3 + x->*2;
+
+    --- Expected output (text)---
+    f(-7.3)=-335.727, f'(-7.3)=145.27
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+Teste 7
+    --- Input ---
+    double v = -0.5;
+    auto f = 1.0 / (sin(x)->*2 + cos(x)->*2)->*4;
+
+    --- Expected output (text)---
+    f(-0.5)=1, f'(-0.5)=0
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+Teste 8
+    --- Input ---
+    double v = 0.1;
+    auto f = 1 / (1 + exp( -2*( x - 1 )->*4 ) );
+
+    --- Expected output (text)---
+    f(0.1)=0.787881, f'(0.1)=0.97467
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+Teste 9
+    --- Input ---
+    double v = 3;
+    auto f = exp( x * log( x ) );
+
+    --- Expected output (text)---
+    f(3)=27, f'(3)=56.6625
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+Teste 10
+    --- Input ---
+    double v = 3;
+    auto f =  2 * x->*1.1;
+
+    --- Expected output (text)---
+    Operador de potenciação definido apenas para inteiros
+    Essa nota será dada manualmente - gere um erro estático. Exemplo:
+    In file included from teste.gerado.cc:7:0:
+    derivador.cc: In instantiation of ‘constexpr auto operator->*(F, G) [with F = <lambda(double)>; G = double]’:
+    teste.gerado.cc:14:19:   required from here
+    derivador.cc:68:9: error: static assertion failed: Operador de potenciação definido apenas para inteiros
+            static_assert( !is_same_v< double, G >, "Operador de potenciação definido apenas para inteiros" );
+            ^~~~~~~~~~~~~
+    sh: 1: ./executavel: not found
+
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
