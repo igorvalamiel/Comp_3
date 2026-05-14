@@ -49,6 +49,14 @@ template <typename G>
 auto operator + (double f, const G& g) {
     return Adicao<Cte, G>{Cte(f), g};
 }
+template <typename F>
+auto operator + (const F& f, int g) {
+    return Adicao<F, Cte>{f, Cte(g)};
+}
+template <typename G>
+auto operator + (int f, const G& g) {
+    return Adicao<Cte, G>{Cte(f), g};
+}
 
 // ----------------------------------------------------------------------------
 // Operação SUBTRACAO -
@@ -75,6 +83,14 @@ auto operator - (const F& f, double g) {
 }
 template <typename G>
 auto operator - (double f, const G& g) {
+    return Subtracao<Cte, G>{Cte(f), g};
+}
+template <typename F>
+auto operator - (const F& f, int g) {
+    return Subtracao<F, Cte>{f, Cte(g)};
+}
+template <typename G>
+auto operator - (int f, const G& g) {
     return Subtracao<Cte, G>{Cte(f), g};
 }
 
@@ -105,6 +121,14 @@ template <typename G>
 auto operator * (double f, const G& g) {
     return Multiplicacao<Cte, G>{Cte(f), g};
 }
+template <typename F>
+auto operator * (const F& f, int g) {
+    return Multiplicacao<F, Cte>{f, Cte(g)};
+}
+template <typename G>
+auto operator * (int f, const G& g) {
+    return Multiplicacao<Cte, G>{Cte(f), g};
+}
 
 // ----------------------------------------------------------------------------
 // Operação DIVISAO /
@@ -113,7 +137,7 @@ class Divisao {
     public:
         Divisao (const F& f, const G& g): f(f), g(g) {}
 
-        double e(double v) const {return f.e(v) * g.e(v);}
+        double e(double v) const {return f.e(v) / g.e(v);}
         double dx(double v) const {
             auto dividendo = (f.dx(v) * g.e(v)) - (f.e(v) * g.dx(v));
             auto divisor = g.e(v) * g.e(v);
@@ -137,9 +161,46 @@ template <typename G>
 auto operator / (double f, const G& g) {
     return Divisao<Cte, G>{Cte(f), g};
 }
+template <typename F>
+auto operator / (const F& f, int g) {
+    return Divisao<F, Cte>{f, Cte(g)};
+}
+template <typename G>
+auto operator / (int f, const G& g) {
+    return Divisao<Cte, G>{Cte(f), g};
+}
 
 // ----------------------------------------------------------------------------
 // Operação POTENCIACAO ->*
+template <typename F>
+class Potenciacao {
+public:
+    Potenciacao(const F& f, int g): f(f), g(g) {}
+
+    double e(double v) const {
+        double result = 1;
+
+        for (int i = 0; i < g; i++) {result *= f.e(v);}
+
+        return result;
+    }
+
+    double dx(double v) const {
+        if (g == 0) return 0;
+
+        return (g * Potenciacao<F>(f, g - 1).e(v) * f.dx(v));
+    }
+
+private:
+    F f;
+    int g;
+};
+
+template <typename F, typename G>
+auto operator ->* (const F& f, G g) {
+    static_assert(is_same_v<G, int>, "O expoente deve ser um numero inteiro!");
+    return Potenciacao<F>{f, g};
+}
 
 // ----------------------------------------------------------------------------
 // Operação EXP exp(f)
@@ -216,8 +277,8 @@ auto cos(const F& f) {
 
 // ----------------------------------------------------------------------------
 int main(){
-    double v = 3.14159;
-    auto f =  sin(x)/cos(x);
+    double v = 0.1;
+    auto f = 1 / (1 + exp( -2*( x - 1 )->*4 ) );
     cout << "f(" << v << ") = " << f.e(v) << "\n f'(" << v << ") = " << f.dx(v) << endl;
 
     return 0;
