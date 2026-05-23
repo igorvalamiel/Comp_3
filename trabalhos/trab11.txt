@@ -1,0 +1,89 @@
+g++ -Wall -Wextra -std=c++17 -o trab11 trab11.cc
+
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+Teste 1
+    --- Input ---
+    variant<int,char,string> v = 42;
+    cout << v << "\n";
+
+    --- Expected output (exact text)---
+    42
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+Teste 2
+    --- Input ---
+    variant<int,char,string> v = 'Z';
+    cout << v << "\n";
+
+    --- Expected output (exact text)---
+    Z
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+Teste 3
+    --- Input ---
+    variant<int,double,string> v = 3.14;
+    cout << v << "\n";
+
+    --- Expected output (exact text)---
+    3.14
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+Teste 4
+    --- Input ---
+    variant<int,string,double> v = 7;
+    cout << v << " ";
+    v = string("depois");
+    cout << v << "\n";
+
+    --- Expected output (exact text)---
+    7 depois
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+Teste 5
+    --- Input ---
+    variant<string,int,double> v = string("Hello, world");
+    cout << v << "!";
+
+    --- Expected output (exact text)---
+    Hello, world!
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+Teste 6
+    --- Input ---
+    variant<string,int,double> v = string("primeiro");
+    cout << v;
+
+    --- Expected output (exact text)---
+    primeiro
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+Teste 7
+    --- Input ---
+    variant<int,string,double> v = 2.5;
+    cout << v;
+
+    --- Expected output (exact text)---
+    2.5
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+Teste 8
+    --- Input ---
+    variant<int,char,string,double,float,long> v = 3.14f;
+    cout << v;
+
+    --- Expected output (exact text)---
+    3.14
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+Teste 9
+    --- Input ---
+    variant<int,string,double> v = 42;
+    cout << v << endl;
+
+    --- Expected output (exact text)---
+    42
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+Teste 10
+    --- Input ---
+    vector<variant<int,double,string>> v = {1, 3.14, string("ola"), 42, string("mundo")};
+    for (auto& x : v) cout << x << endl;
+
+    --- Expected output (exact text)---
+    1
+    3.14
+    ola
+    42
+    mundo
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
