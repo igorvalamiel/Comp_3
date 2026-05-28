@@ -53,8 +53,25 @@ auto operator * ( Op1 a, Op2 b ) {
     return Multiplica< Op1, Op2 >( a, b );
 }
 
-X x;
+template <typename Op1, typename Op2>
+class Modulo {
+public:
+    Modulo(Op1 a, Op2 b) : a(a), b(b) {}
+    auto operator()(auto valor) { return a(valor) % b(valor); }
+private:
+    Op1 a; Op2 b;
+};
 
+template <typename Op1, typename Op2>
+class Igual {
+public:
+    Igual(Op1 a, Op2 b) : a(a), b(b) {}
+    auto operator()(auto valor) { return a(valor) == b(valor); }
+private:
+    Op1 a; Op2 b;
+};
+
+X x;
 
 
 template <typename Left, typename Right>
@@ -66,10 +83,9 @@ public:
 
     print(ostream& os, Left l, Right r) : os(os), left(l), right(r) {}
 
-
     void operator()(auto valor) {
         if constexpr (!is_same_v<Left, nullptr_t>) {
-            left(valor);
+            left(valor); 
         }
         if constexpr (requires { right(valor); }) {
             os << right(valor);
@@ -79,17 +95,17 @@ public:
     }
 };
 
-
 template <typename T> struct is_my_expr : false_type {};
 template <> struct is_my_expr<X> : true_type {};
 template <typename A, typename B> struct is_my_expr<Soma<A, B>> : true_type {};
 template <typename A, typename B> struct is_my_expr<Multiplica<A, B>> : true_type {};
+template <typename A, typename B> struct is_my_expr<Modulo<A, B>> : true_type {};
+template <typename A, typename B> struct is_my_expr<Igual<A, B>> : true_type {};
 template <typename T> struct is_my_expr<Cte<T>> : true_type {};
 template <typename L, typename R> struct is_my_expr<print<L, R>> : true_type {};
 
 template <typename T>
 concept MyExpr = is_my_expr<decay_t<T>>::value;
-
 
 template <MyExpr R>
 auto operator<<(ostream& os, R&& right) {
@@ -129,4 +145,25 @@ auto operator | (const I& item, F funcao) {
         }
         return return_list;
     }
+}
+
+template <typename T>
+auto wrap(T&& val) {
+    if constexpr (MyExpr<T>) {
+        return forward<T>(val);
+    } else {
+        return Cte<decay_t<T>>(forward<T>(val));
+    }
+}
+
+template <typename Op1, typename Op2>
+requires (MyExpr<Op1> || MyExpr<Op2>)
+auto operator % (Op1&& a, Op2&& b) { 
+    return Modulo(wrap(forward<Op1>(a)), wrap(forward<Op2>(b))); 
+}
+
+template <typename Op1, typename Op2>
+requires (MyExpr<Op1> || MyExpr<Op2>)
+auto operator == (Op1&& a, Op2&& b) { 
+    return Igual(wrap(forward<Op1>(a)), wrap(forward<Op2>(b))); 
 }
