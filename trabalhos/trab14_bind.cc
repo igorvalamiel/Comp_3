@@ -3,12 +3,19 @@
 
 using namespace std;
 
-template <typename F, typename... ArgsGuardados>
-class Bind;
+template <typename F, typename... Args>
+auto call(F&& f, Args&&... args) -> decltype(forward<F>(f)(forward<Args>(args)...)) {
+    return forward<F>(f)(forward<Args>(args)...);
+}
 
-template <typename F, typename... ArgsGuardados>
-Bind<F, ArgsGuardados...> bind_aux(F f, ArgsGuardados... args) {
-    return Bind<F, ArgsGuardados...>(f, args...);
+template <typename M, typename T, typename... Args>
+auto call(M&& m, T&& obj, Args&&... args) -> decltype((forward<T>(obj).*forward<M>(m))(forward<Args>(args)...)) {
+    return (forward<T>(obj).*forward<M>(m))(forward<Args>(args)...);
+}
+
+template <typename M, typename T, typename... Args>
+auto call(M&& m, T* obj, Args&&... args) -> decltype((obj->*forward<M>(m))(forward<Args>(args)...)) {
+    return (obj->*forward<M>(m))(forward<Args>(args)...);
 }
 
 template <typename F, typename... ArgsGuardados>
@@ -17,11 +24,11 @@ public:
     Bind(F f, ArgsGuardados... args) : Func(f), guardados(args...) {}
 
     template <typename... ArgsNovos>
-    auto operator()(ArgsNovos... args) {
-        if constexpr (requires { Func(get<ArgsGuardados>(guardados)..., args...); }) {
-            return chama_funcao(index_sequence_for<ArgsGuardados...>{}, args...);
+    auto operator()(ArgsNovos&&... args) {
+        if constexpr (requires { call(Func, get<ArgsGuardados>(guardados)..., forward<ArgsNovos>(args)...); }) {
+            return executa(make_index_sequence<sizeof...(ArgsGuardados)>{}, forward<ArgsNovos>(args)...);
         } else {
-            return junta_e_cria_novo_bind(index_sequence_for<ArgsGuardados...>{}, args...);
+            return acumula(make_index_sequence<sizeof...(ArgsGuardados)>{}, forward<ArgsNovos>(args)...);
         }
     }
 
@@ -30,17 +37,19 @@ private:
     tuple<ArgsGuardados...> guardados;
 
     template <size_t... Is, typename... ArgsNovos>
-    auto chama_funcao(index_sequence<Is...>, ArgsNovos... args) {
-        return Func(get<Is>(guardados)..., args...);
+    auto executa(index_sequence<Is...>, ArgsNovos&&... args) {
+        return call(Func, get<Is>(guardados)..., forward<ArgsNovos>(args)...);
     }
 
     template <size_t... Is, typename... ArgsNovos>
-    auto junta_e_cria_novo_bind(index_sequence<Is...>, ArgsNovos... args) {
-        return bind_aux(Func, get<Is>(guardados)..., args...);
+    auto acumula(index_sequence<Is...>, ArgsNovos&&... args) {
+        return Bind<F, ArgsGuardados..., decay_t<ArgsNovos>...>(
+            Func, get<Is>(guardados)..., forward<ArgsNovos>(args)...
+        );
     }
 };
 
 template <typename F, typename... Args>
 auto bind(F Func, Args... args) {
-    return Bind<F, Args...>(Func, args...);
+    return Bind<F, decay_t<Args>...>(Func, args...);
 }
