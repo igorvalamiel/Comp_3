@@ -34,11 +34,6 @@ private:
 };
 
 template <typename Op1, typename Op2>
-auto operator + ( Op1 a, Op2 b ) {
-    return Soma< Op1, Op2 >( a, b );
-}
-
-template <typename Op1, typename Op2>
 class Multiplica {
 public:
     Multiplica(Op1 a, Op2 b) : a(a), b(b) {}
@@ -154,6 +149,12 @@ auto wrap(T&& val) {
     } else {
         return Cte<decay_t<T>>(forward<T>(val));
     }
+}
+
+template <typename Op1, typename Op2>
+requires (MyExpr<Op1> || MyExpr<Op2>)
+auto operator + ( Op1&& a, Op2&& b ) {
+    return Soma( wrap( forward<Op1>(a) ), wrap( forward<Op2>(b) ) );
 }
 
 template <typename Op1, typename Op2>
