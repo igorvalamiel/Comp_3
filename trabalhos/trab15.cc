@@ -2,6 +2,7 @@
 #include <type_traits>
 #include <cmath>
 #include <string>
+#include <sstream>
 
 using namespace std;
 
@@ -20,7 +21,11 @@ class Cte {
         Cte(double v) : valor(v) {}
         double e(double v) const {return valor;}
         double dx(double v) const {return 0;}
-        string str() const {return to_string(valor);}
+        string str() const {
+            stringstream ss;
+            ss << valor;
+            return ss.str();
+        }
         string dx_str() const {return "(0)";}
     private:
         double valor;
@@ -36,6 +41,8 @@ class Adicao {
 
         double e(double v) const {return f.e(v) + g.e(v);}
         double dx(double v) const {return f.dx(v) + g.dx(v);}
+        string str() const {return "(" + f.str() + "+" + g.str() + ")";}
+        string dx_str() const {return "(" + f.dx_str() + "+" + g.dx_str() + ")";}
     
     private:
         F f;
@@ -72,6 +79,8 @@ class Subtracao {
 
         double e(double v) const {return f.e(v) - g.e(v);}
         double dx(double v) const {return f.dx(v) - g.dx(v);}
+        string str() const {return "(" + f.str() + "-" + g.str() + ")";}
+        string dx_str() const {return "(" + f.dx_str() + "-" + g.dx_str() + ")";}
     
     private:
         F f;
@@ -149,6 +158,12 @@ class Divisao {
             auto dividendo = (f.dx(v) * g.e(v)) - (f.e(v) * g.dx(v));
             auto divisor = g.e(v) * g.e(v);
             return dividendo/divisor;
+        }
+        string str() const {return "(" + f.str() + "/" + g.str() + ")";}
+        string dx_str() const {
+            auto dividendo = "(" + f.dx_str() + "*" + g.str() + ") - (" + f.str() + "*" + g.dx_str() + ")";
+            auto divisor = g.str() + "*" + g.str();
+            return "(" + dividendo + "/" + divisor + ")";
         }
     
     private:
@@ -285,7 +300,7 @@ auto cos(const F& f) {
 // ----------------------------------------------------------------------------
 int main(){
     double v = 0.1;
-    auto f = x*v;
+    auto f = x/v;
     cout << "f(x) = " << f.str() << "\n f'(x) = " << f.dx_str() << endl;
 
     return 0;
