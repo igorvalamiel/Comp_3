@@ -118,7 +118,7 @@ class Multiplicacao {
         double e(double v) const {return f.e(v) * g.e(v);}
         double dx(double v) const {return (f.dx(v) * g.e(v)) + (f.e(v) * g.dx(v));}
         string str() const {return "(" + f.str() + "*" + g.str() + ")";}
-        string dx_str() const {return "(" + (f.dx_str() + "*" + g.str()) + "+" + (f.str() + "*" + g.dx_str()) + ")";}
+        string dx_str() const {return "((" + f.dx_str() + ")*" + g.str() + "+" + f.str() + "*" + g.dx_str() + ")";}
     
     private:
         F f;
@@ -248,6 +248,8 @@ class Exp {
 
         double e(double v) const {return std::exp(f.e(v));}
         double dx(double v) const {return std::exp(f.e(v)) * f.dx(v);}
+        string str() const {return "exp(" + f.str() + ")";}
+        string dx_str() const {return "(exp(" + f.str() + ")*" + f.dx_str() + ")";}
     
     private:
         F f;
@@ -266,6 +268,8 @@ class Log {
 
         double e(double v) const {return std::log(f.e(v));}
         double dx(double v) const {return f.dx(v) / f.e(v);}
+        string str() const {return "(log(" + f.str() + "))";}
+        string dx_str() const {return "(1/(" + f.str() + ")*" + f.dx_str() + ")";}
     
     private:
         F f;
