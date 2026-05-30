@@ -24,7 +24,7 @@ class Cte {
         string str() const {
             stringstream ss;
             ss << valor;
-            return ss.str();
+            return "(" + ss.str() + ")";
         }
         string dx_str() const {return "(0)";}
     private:
@@ -162,7 +162,7 @@ class Divisao {
         string str() const {return "(" + f.str() + "/" + g.str() + ")";}
         string dx_str() const {
             auto dividendo = "(" + f.dx_str() + "*" + g.str() + ") - (" + f.str() + "*" + g.dx_str() + ")";
-            auto divisor = g.str() + "*" + g.str();
+            auto divisor = "((" + g.str() + ")^2)";
             return "(" + dividendo + "/" + divisor + ")";
         }
     
@@ -284,6 +284,8 @@ class Sin {
 
         double e(double v) const {return std::sin(f.e(v));}
         double dx(double v) const {return std::cos(f.e(v)) * f.dx(v);}
+        string str() const {return "sin(" + f.str() + ")";}
+        string dx_str() const {return "((cos(" + f.str() + ")*" + f.dx_str() + "))";}
     
     private:
         F f;
@@ -302,6 +304,8 @@ class Cos {
 
         double e(double v) const {return std::cos(f.e(v));}
         double dx(double v) const {return -1 * std::sin(f.e(v)) * f.dx(v);}
+        string str() const {return "cos(" + f.str() + ")";}
+        string dx_str() const {return "((-sin(" + f.str() + ")*" + f.dx_str() + "))";}
     
     private:
         F f;
@@ -315,7 +319,7 @@ auto cos(const F& f) {
 // ----------------------------------------------------------------------------
 int main(){
     double v = 0.1;
-    auto f = x->*3;
+    auto f = cos(x);
     cout << "f(x) = " << f.str() << "\n f'(x) = " << f.dx_str() << endl;
 
     return 0;
