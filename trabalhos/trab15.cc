@@ -213,6 +213,21 @@ public:
         return (g * Potenciacao<F>(f, g - 1).e(v) * f.dx(v));
     }
 
+    string str() const {
+        stringstream ss;
+        ss << g;
+        
+        return f.str() + "^" + ss.str();
+    }
+
+    string dx_str() const {
+        if (g == 0) return "(0)";
+        stringstream ss;
+        ss << g;
+
+        return "(" + ss.str() + "*" + f.dx_str() + "*" + Potenciacao<F>(f, g - 1).str() + ")";
+    }
+
 private:
     F f;
     int g;
@@ -300,7 +315,7 @@ auto cos(const F& f) {
 // ----------------------------------------------------------------------------
 int main(){
     double v = 0.1;
-    auto f = x/v;
+    auto f = x->*3;
     cout << "f(x) = " << f.str() << "\n f'(x) = " << f.dx_str() << endl;
 
     return 0;
