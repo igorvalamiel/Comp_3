@@ -73,6 +73,14 @@ class Var {
                 }
         };
 
+        class Erro {
+            public:
+                Erro( string msg ): msg(msg) {}
+                
+                string operator()() const { return msg; }
+            private:
+                string msg;
+        };
 
         // Operators
         
@@ -104,8 +112,12 @@ class Var {
         }
 
         Var operator()(Var arg) {
-            Function* fPtr = static_cast<Function*>(valor.get());
-            return fPtr->executar(arg);
+            if (valor->t == T_FUNC) {
+                Function* fPtr = static_cast<Function*>(valor.get());
+                return fPtr->executar(arg);
+            }
+            if (valor->t != T_UNDEFINED) {throw Erro("Essa variável não pode ser usada como função");}
+            return Var();
         }
 
         friend ostream& operator<<(ostream& os, const Var& v) {
@@ -118,16 +130,19 @@ class Var {
         }
 
 
-        class Erro {
-            public:
-                Erro( string msg ): msg(msg) {}
-                
-                string operator()() const { return msg; }
-            private:
-                string msg;
-        };
+        // auxiliar functions
+        static Var createOBJ() {
+            Var v;
+            v.valor = shared_ptr<Undefined>( new Object() );
+            return v;
+        }
+
+
     private:
         shared_ptr<Undefined> valor;
 };
 
-
+Var newObject() {
+    Var obj;
+    return obj.createOBJ();
+}

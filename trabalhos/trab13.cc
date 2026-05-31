@@ -20,8 +20,8 @@ int main( int argc, char* argv[] ) try {
  
     /* TESTCASE-PLACE-HOLDER */
     Var a;
-    a = 3;
-    cout << a["mes"] << endl;
+    a = newObject();
+    cout << a(5) << endl;
     
     return 0;
 } catch( Var::Erro e ) {
