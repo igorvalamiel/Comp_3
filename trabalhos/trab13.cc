@@ -19,11 +19,9 @@ void imprime( Var v ) { v["print"]( v ); }
 int main( int argc, char* argv[] ) try {
  
     /* TESTCASE-PLACE-HOLDER */
-    Var a, b = 10;
-    cout << a << " " << b << endl;
-    a = 3.14;
-    b = "uma string";
-    cout << a << " " << b << endl;
+    Var a;
+    a = 3;
+    cout << a["mes"] << endl;
     
     return 0;
 } catch( Var::Erro e ) {

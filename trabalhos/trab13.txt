@@ -10,35 +10,6 @@ Var operator <= ( const Var& a, const Var& b ) { return !(b<a); }
 Var operator >= ( const Var& a, const Var& b ) { return !(a<b); }
 
 
-        // Versão para escrita/modificação (o que você já tem, mas retornando Var&)
-        Var& operator[](string s) {
-            if (!dynamic_pointer_cast<Object>(valor)) {
-                valor = make_shared<Object>();
-            }
-            return dynamic_pointer_cast<Object>(valor)->atributos[s];
-        }
-
-
-
-
-        //Var& operator[](string s) {
-        //    valor = shared_ptr<Undefined>( new Object() );
-        //    Object* objPtr = static_cast<Object*>(valor.get());
-        //    return objPtr->atributos[s];
-        //}
-        Var operator[](string s) const {
-            Object* objPtr = dynamic_cast<Object*>(valor.get()); 
-            
-            if (objPtr) {
-                auto it = objPtr->atributos.find(s);
-                if (it != objPtr->atributos.end()) {
-                    return it->second;
-                }
-            }
-            return Var();
-        }
-
-
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 Teste 1
     --- Input ---

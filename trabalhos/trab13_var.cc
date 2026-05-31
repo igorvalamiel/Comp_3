@@ -9,11 +9,10 @@ enum Tipo { T_UNDEFINED, T_INT, T_DOUBLE, T_STR, T_OBJ, T_FUNC };
 
 class Undefined {
     public:
+        Tipo t;
         Undefined(Tipo t = T_UNDEFINED) : t(t) {}
         virtual ~Undefined() = default;
         virtual void print(ostream& os) const {os << "undefined";}
-    private:
-        Tipo t;
 };
 
  
@@ -99,6 +98,8 @@ class Var {
         //Var operator >= ( const Var& a, const Var& b ) { return !(a<b); }
 
         Var operator[](string s) const {
+            if (valor->t == T_OBJ) {return Var();}
+            if (valor->t != T_UNDEFINED) {throw Erro("Essa variável não é um objeto");}
             return Var();
         }
 
