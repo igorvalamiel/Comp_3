@@ -32,18 +32,28 @@ class Var {
         // Classes
         class Int: public Undefined {
             public:
+                int n;
                 Int( int n ): Undefined(T_INT), n(n) {}
                 virtual void print(ostream& os) const override {os << n;}
-            private:
-                int n;
+
+                virtual Var Somar(const Undefined* outro) const override {
+                    if (outro->t == T_INT) return Var(this->n + static_cast<const Int*>(outro)->n);
+                    if (outro->t == T_DOUBLE) return Var(this->n + static_cast<const Double*>(outro)->d);
+                    throw Var::Erro("Não sei somar isso");
+                }
         };
 
         class Double: public Undefined {
             public:
+                double d;
                 Double( double d ): Undefined(T_DOUBLE), d(d) {}
                 virtual void print(ostream& os) const override {os << d;}
-            private:
-                double d;
+
+                virtual Var Somar(const Undefined* outro) const override {
+                    if (outro->t == T_INT) return Var(this->d + static_cast<const Int*>(outro)->n);
+                    if (outro->t == T_DOUBLE) return Var(this->d + static_cast<const Double*>(outro)->d);
+                    throw Var::Erro("Não sei somar isso");
+                }
         };
         
         class String: public Undefined {
@@ -112,11 +122,9 @@ class Var {
             return *this;
         }
 
-        //Var operator > ( const Var& a, const Var& b ) { return b<a; }
-        //Var operator != ( const Var& a, const Var& b ) { return (a<b) || (b<a); }
-        //Var operator == ( const Var& a, const Var& b ) { return !(a!=b); }
-        //Var operator <= ( const Var& a, const Var& b ) { return !(b<a); }
-        //Var operator >= ( const Var& a, const Var& b ) { return !(a<b); }
+        Var operator+(const Var& outro) const {
+            return valor->Somar(outro.valor.get());
+        }
 
         Var operator[](string s) const {
             if (valor->t == T_OBJ) {return Var();}
@@ -142,6 +150,12 @@ class Var {
             return os;
         }
 
+        friend Var operator>(const Var& a, const Var& b) { return b < a;}
+        friend Var operator != ( const Var& a, const Var& b ) { return (a<b) || (b<a); }
+        friend Var operator == ( const Var& a, const Var& b ) { return !(a!=b); }
+        friend Var operator <= ( const Var& a, const Var& b ) { return !(b<a); }
+        friend Var operator >= ( const Var& a, const Var& b ) { return !(a<b); }
+
 
         // auxiliar functions
         static Var createOBJ() {
@@ -163,3 +177,4 @@ Var newObject() {
     Var obj;
     return obj.createOBJ();
 }
+

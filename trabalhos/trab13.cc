@@ -22,12 +22,9 @@ int main( int argc, char* argv[] ) try {
     Var a[5] = { true, 'X', 2, 2.1, "abracadabra" };
     Var b = 200, c = 300.1, d = "palavra ";
     for( auto& x: a ) {
-        cout << x+b << "," << x+c << "," << x+d << "," << endl;
+        cout << x+b << "," << x+c << "," << x+d << "," << 3 / x << "," << 1.1 * x << "," 
+            << Var(x && true) << "," << Var(x && false) <<  "," << Var(b >= x) << "," << Var(x < d) << endl;
     }
-    //for( auto& x: a ) {
-    //    cout << x+b << "," << x+c << "," << x+d << "," << 3 / x << "," << 1.1 * x << "," 
-    //        << Var(x && true) << "," << Var(x && false) <<  "," << Var(b >= x) << "," << Var(x < d) << endl;
-    //}
     
     return 0;
 } catch( Var::Erro e ) {
