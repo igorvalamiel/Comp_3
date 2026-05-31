@@ -7,12 +7,15 @@ using namespace std;
 
 enum Tipo { T_UNDEFINED, T_INT, T_DOUBLE, T_STR, T_OBJ, T_FUNC };
 
+class Var;
+
 class Undefined {
     public:
         Tipo t;
         Undefined(Tipo t = T_UNDEFINED) : t(t) {}
         virtual ~Undefined() = default;
         virtual void print(ostream& os) const {os << "undefined";}
+        virtual Var Somar(const Undefined* outro) const;
 };
 
  
@@ -20,6 +23,11 @@ class Var {
     public:
         Var() : valor( new Undefined() ) {}
         Var(int n) : valor( shared_ptr<Undefined>(new Int(n))) {}
+        Var(double n) : valor( shared_ptr<Undefined>(new Double(n))) {}
+        Var(const char* s) : valor(new String(string(s))) {}
+        Var(string s) : valor(new String(s)) {}
+        Var(bool b) : valor(new Int(b ? 1 : 0)) {} 
+        Var(char c) : valor(new Int((int)c)) {}
 
         // Classes
         class Int: public Undefined {
@@ -84,18 +92,23 @@ class Var {
 
         // Operators
         
-        Var operator = (int n) {
+        Var& operator = (int n) {
             valor = shared_ptr<Undefined>( new Int( n ) );
             return *this;
         }
 
-        Var operator = (double d) {
+        Var& operator = (double d) {
             valor = shared_ptr<Undefined>( new Double( d ) );
             return *this;
         }
 
-        Var operator = (string s) {
+        Var& operator = (string s) {
             valor = shared_ptr<Undefined>( new String( s ) );
+            return *this;
+        }
+
+        Var& operator=(const char* s) {
+            valor = shared_ptr<Undefined>(new String(s));
             return *this;
         }
 
@@ -141,6 +154,10 @@ class Var {
     private:
         shared_ptr<Undefined> valor;
 };
+
+Var Undefined::Somar(const Undefined* outro) const {
+    return Var();
+}
 
 Var newObject() {
     Var obj;
