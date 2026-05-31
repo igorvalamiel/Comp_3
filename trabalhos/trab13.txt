@@ -1,0 +1,134 @@
+g++ -std=c++20 -o trab13 trab13.cc
+
+
+// Os operadores abaixo podem ser implementados utilizando os operadores !, || e <
+
+Var operator > ( const Var& a, const Var& b ) { return b<a; }
+Var operator != ( const Var& a, const Var& b ) { return (a<b) || (b<a); }
+Var operator == ( const Var& a, const Var& b ) { return !(a!=b); }
+Var operator <= ( const Var& a, const Var& b ) { return !(b<a); }
+Var operator >= ( const Var& a, const Var& b ) { return !(a<b); }
+
+
+
+
+
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+Teste 1
+    --- Input ---
+    Var a, b = 10;
+    cout << a << " " << b << endl;
+    a = 3.14;
+    b = "uma string";
+    cout << a << " " << b << endl;
+
+    --- Expected output (exact text)---
+    undefined 10
+    3.14 uma string
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+Teste 2
+    --- Input ---
+    Var a;
+    a = 3;
+    cout << a["mes"] << endl;
+
+    --- Expected output (exact text)---
+    Erro fatal: Essa variável não é um objeto
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+Teste 3
+    --- Input ---
+    Var a;
+    a = newObject();
+    cout << a(5) << endl;
+
+    --- Expected output (exact text)---
+    Erro fatal: Essa variável não pode ser usada como função
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+Teste 4
+    --- Input ---
+    Var a[5] = { true, 'X', 2, 2.1, "abracadabra" };
+    Var b = 200, c = 300.1, d = "palavra ";
+    for( auto& x: a ) {
+      cout << x+b << "," << x+c << "," << x+d << "," << 3 / x << "," << 1.1 * x << "," 
+           << Var(x && true) << "," << Var(x && false) <<  "," << Var(b >= x) << "," << Var(x < d) << endl;
+    }
+
+    --- Expected output (exact text)---
+    undefined,undefined,undefined,undefined,undefined,true,false,undefined,undefined
+    288,undefined,Xpalavra ,undefined,undefined,undefined,undefined,true,true
+    202,302.1,undefined,1,2.2,undefined,undefined,true,undefined
+    202.1,302.2,undefined,1.42857,2.31,undefined,undefined,true,undefined
+    undefined,undefined,abracadabrapalavra ,undefined,undefined,undefined,undefined,undefined,true
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+Teste 5
+    --- Input ---
+    Var a, b;
+    a = newObject();
+    b = "José Maria";
+    a["nome"] = b;
+    a["nascimento"] = 1998;
+    b = "Maria José";
+    try {
+      print( a );
+    } catch( Var::Erro e ) {
+      cout << "Erro fatal: " << e() << endl;
+    }
+    cout << a << " " << a["nome"] << " " << a["nascimento"] << endl;
+
+    --- Expected output (exact text)---
+    { nome: José Maria, idade: Erro fatal: Essa variável não pode ser usada como função
+    object José Maria 1998
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+Teste 6
+    --- Input ---
+    Var a, b;
+    a = 10.1;
+    b = []( auto x ){ return x + x; };
+    cout << b( a ) << " ";
+    cout << b( "oba" ) << " ";
+    cout << b( 'X' ) << " ";
+    cout << b( true );
+
+    --- Expected output (exact text)---
+    "20.2 obaoba XX undefined"
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+Teste 7
+    --- Input ---
+    Var a = newObject();
+    Var b = "José", c = "Maria";
+    a["nome"] = b + ' ' + c;
+    a["idade"] = []( auto v ) { return 2019 - v["nascimento"]; };
+    a["nascimento"] = 1990;
+    a["print"] = &print;
+    b = a;
+    imprime( a );
+    a["nascimento"] = 2001;
+    imprime( a );
+    imprime( b );
+
+    --- Expected output (exact text)---
+    { nome: José Maria, idade: 29, nascimento: 1990, print: function, atr: undefined }
+    { nome: José Maria, idade: 18, nascimento: 2001, print: function, atr: undefined }
+    { nome: José Maria, idade: 18, nascimento: 2001, print: function, atr: undefined }
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+Teste 8
+    --- Input ---
+    Var a, b;
+    a = newObject();
+    a["init"] = []( auto x ) { x["nome"] = "Manoel"; 
+                               x["idade"] = []( auto v ) { return 2019 - v["nascimento"]; }; 
+                               x["nascimento"] = 1987; 
+                               x["print"] = &print;
+                               return x; };
+    b = [a]( auto x ){ return x( a ); };
+    a["funcao"] = b;
+    b = &print;
+    a["funcao"]( a["init"] );
+    a["atr"] = a["init"]( newObject() ); 
+    a["funcao"]( b );
+    imprime( a["atr"] );
+
+    --- Expected output (exact text)---
+    { nome: Manoel, idade: 32, nascimento: 1987, print: function, atr: object }
+    { nome: Manoel, idade: 32, nascimento: 1987, print: function, atr: undefined }
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
