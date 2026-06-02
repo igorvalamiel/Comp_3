@@ -15,19 +15,31 @@ Var print( const Var& o ) {
 }
  
 void imprime( Var v ) { v["print"]( v ); }
+
+void printVar (Var v) {cout << '\n' << v.type() << '\n'; }
  
 int main( int argc, char* argv[] ) try {
  
     /* TESTCASE-PLACE-HOLDER */
-    Var a[5] = { true, 'X', 2, 2.1, "abracadabra" };
-    Var b = 200, c = 300.1, d = "palavra ";
-    for( auto& x: a ) {
-        cout << x+b << "," << x+c << "," << x+d << "," << 3 / x << "," << 1.1 * x << "," 
-            << Var(x && true) << "," << Var(x && false) <<  "," << Var(b >= x) << "," << Var(x < d) << endl;
+    Var a, b;
+    a = newObject();
+    printVar(a);
+    b = "José Maria";
+    printVar(b);
+    a["nome"] = b;
+    a["nascimento"] = 1998;
+    b = "Maria José";
+    try {
+    print( a );
+    } catch( Var::Erro e ) {
+    cout << "Erro fatal: " << e() << endl;
     }
+    cout << a << " " << a["nome"] << " " << a["nascimento"] << endl;
     
     return 0;
 } catch( Var::Erro e ) {
     cout << "Erro fatal: " << e() << endl;
 }
-// 288,undefined,Xpalavra ,undefined,undefined,undefined,undefined,true,true
+
+// { nome: José Maria, idade: Erro fatal: Essa variável não pode ser usada como função
+// object José Maria 1998

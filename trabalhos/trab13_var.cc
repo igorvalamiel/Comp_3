@@ -3,6 +3,7 @@
 #include <string>
 #include <map>
 #include <functional>
+#include <vector>
 
 using namespace std;
 
@@ -244,10 +245,25 @@ class Var {
             return a.valor->Divide(b.valor.get());
         }
 
+        // lendo
         Var operator[](string s) const {
-            if (valor->t == T_OBJ) {return Var();}
-            if (valor->t != T_UNDEFINED) {throw Erro("Essa variável não é um objeto");}
-            return Var();
+            if (valor->t == T_OBJ) {
+                const Object* objPtr = static_cast<const Object*>(valor.get());
+                
+                auto it = objPtr->atributos.find(s);
+                if (it != objPtr->atributos.end()) { return it->second; }
+                throw Erro("Essa variável não pode ser usada como função");
+            }
+            throw Erro("Essa variável não é um objeto");
+        }
+
+        // escrevendo
+        Var& operator[](string s) {
+            if (valor->t == T_OBJ) {
+                Object* objPtr = static_cast<Object*>(valor.get());
+                return objPtr->atributos[s];
+            }
+            throw Erro("Essa variável não é um objeto");
         }
 
         Var operator()(Var arg) {
@@ -255,14 +271,17 @@ class Var {
                 Function* fPtr = static_cast<Function*>(valor.get());
                 return fPtr->executar(arg);
             }
-            if (valor->t != T_UNDEFINED) {throw Erro("Essa variável não pode ser usada como função");}
-            return Var();
+            throw Erro("Essa variável não pode ser usada como função");
         }
 
         friend ostream& operator<<(ostream& os, const Var& v) {
-            if (v.valor) {
+            if (v.valor->t == T_OBJ) {
+                os << v.type();
+                return os;
+            } else if (v.valor) {
                 v.valor->print(os);
-            } else {
+            } 
+            else {
                 os << "null";
             }
             return os;
@@ -309,6 +328,12 @@ class Var {
             Var v;
             v.valor = shared_ptr<Undefined>( new Object() );
             return v;
+        }
+
+        // só pra me ajudar no debug (acabou q vou usar kakakakka)
+        string type() const {
+            vector <string> types =  {"undefined", "int", "double", "string", "char", "object", "function", "bool"};
+            return types[valor->t];
         }
 
 
