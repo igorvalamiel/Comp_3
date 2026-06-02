@@ -2,6 +2,7 @@
 #include <memory>
 #include <string>
 #include <map>
+#include <functional>
 
 using namespace std;
 
@@ -65,7 +66,9 @@ class Var {
                 }
 
                 virtual Var Menor(const Undefined* outro) const override {
-                    if (outro->t == T_BOOL) return Var(this->n < static_cast<const Bool*>(outro)->b);
+                    if (outro->t == T_INT) return Var(this->n < static_cast<const Int*>(outro)->n);
+                    if (outro->t == T_DOUBLE) return Var(this->n < static_cast<const Double*>(outro)->d);
+                    if (outro->t == T_CHAR) return Var(this->n < static_cast<const Char*>(outro)->c);
                     return Var();
                 }
         };
@@ -101,7 +104,9 @@ class Var {
                 }
 
                 virtual Var Menor(const Undefined* outro) const override {
-                    if (outro->t == T_BOOL) return Var(this->d < static_cast<const Bool*>(outro)->b);
+                    if (outro->t == T_INT) return Var(this->d < static_cast<const Int*>(outro)->n);
+                    if (outro->t == T_DOUBLE) return Var(this->d < static_cast<const Double*>(outro)->d);
+                    if (outro->t == T_CHAR) return Var(this->d < static_cast<const Char*>(outro)->c);
                     return Var();
                 }
         };
@@ -116,6 +121,11 @@ class Var {
                     if (outro->t == T_STR) return Var(this->s + static_cast<const String*>(outro)->s);
                     return Var();
                 }
+
+                virtual Var Menor(const Undefined* outro) const override {
+                    if (outro->t == T_STR) return Var(this->s < static_cast<const String*>(outro)->s);
+                    return Var();
+                }
         };
 
         class Char: public Undefined {
@@ -128,6 +138,14 @@ class Var {
                     if (outro->t == T_CHAR) return Var(this->c + static_cast<const Char*>(outro)->c);
                     if (outro->t == T_STR) return Var(this->c + static_cast<const String*>(outro)->s);
                     if (outro->t == T_INT) return Var((int)this->c + static_cast<const Int*>(outro)->n);
+                    return Var();
+                }
+
+                virtual Var Menor(const Undefined* outro) const override {
+                    if (outro->t == T_INT) return Var((int)this->c < static_cast<const Int*>(outro)->n);
+                    if (outro->t == T_DOUBLE) return Var((double)this->c < static_cast<const Double*>(outro)->d);
+                    if (outro->t == T_CHAR) return Var(this->c < static_cast<const Char*>(outro)->c);
+                    if (outro->t == T_STR) return Var(string(1, this->c) < static_cast<const String*>(outro)->s);
                     return Var();
                 }
         };
@@ -172,6 +190,11 @@ class Var {
                 virtual Var Multiplica(const Undefined*) const override {return Var();}
 
                 virtual Var Divide(const Undefined*) const override {return Var();}
+
+                virtual Var Menor(const Undefined* outro) const override {
+                    if (outro->t == T_BOOL) return Var(this->b < static_cast<const Bool*>(outro)->b);
+                    return Var();
+                }
         };
 
         class Erro {
@@ -200,7 +223,7 @@ class Var {
             return *this;
         }
 
-        Var& operator=(const char* s) {
+        Var& operator = (const char* s) {
             valor = shared_ptr<Undefined>(new String(s));
             return *this;
         }
@@ -236,14 +259,6 @@ class Var {
             return Var();
         }
 
-        bool turn_bool() const {
-            if (valor->t == T_UNDEFINED) return false;
-            if (valor->t == T_INT) return static_cast<Int*>(valor.get())->n != 0;
-            if (valor->t == T_DOUBLE) return static_cast<Double*>(valor.get())->d != 0.0;
-
-            return true;
-        }
-
         friend ostream& operator<<(ostream& os, const Var& v) {
             if (v.valor) {
                 v.valor->print(os);
@@ -257,55 +272,36 @@ class Var {
             return a.valor->Menor(b.valor.get());
         }
 
-        //friend Var operator < ( const Var& a, const Var& b) {
-        //    if (a.turn_bool() < b.turn_bool()) return Var(true);
-        //    return Var(false);
-        //}
-
         friend Var operator || ( const Var& a, const Var& b) {
-            if (a.turn_bool()) return Var(true);
-            if (b.turn_bool()) return Var(true);
-            return Var(false);
-        }
-        
-        friend Var operator && ( const Var& a, const Var& b) {
-            //cout << a.valor->t << " , " << b.valor->t << endl;
-            if (a.valor->t == T_BOOL and b.valor->t == T_BOOL) {
-                if (!a.turn_bool()) return Var(false);
-                if (!b.turn_bool()) return Var(false);
-                return Var(true);
+            if (a.valor->t == T_BOOL && b.valor->t == T_BOOL) {
+                bool va = static_cast<const Bool*>(a.valor.get())->b;
+                bool vb = static_cast<const Bool*>(b.valor.get())->b;
+                return Var(va || vb);
             }
             return Var();
         }
-/*
-        friend Var operator && ( const Var& a, const bool b) {
-            if (!a.turn_bool()) return Var(false);
-            if (!b) return Var(false);
-            return Var(true);
-        }
-
-        friend Var operator && ( const bool a, const Var& b) {
-            if (!a) return Var(false);
-            if (!b.turn_bool()) return Var(false);
-            return Var(true);
-        }
-*/
-        friend Var operator ! ( const Var& a) {
-            if (a.turn_bool()) return Var(false);
-            return Var(true);
-        }
-
-        friend Var operator > (const Var& a, const Var& b) {
-            if (a.valor->t == T_BOOL and b.valor->t == T_BOOL) return !(a<b);
+        
+        friend Var operator && ( const Var& a, const Var& b) {
+            if (a.valor->t == T_BOOL && b.valor->t == T_BOOL) {
+                bool va = static_cast<const Bool*>(a.valor.get())->b;
+                bool vb = static_cast<const Bool*>(b.valor.get())->b;
+                return Var(va && vb);
+            }
             return Var();
         }
+
+        friend Var operator ! ( const Var& a) {
+            if (a.valor->t == T_BOOL) {
+                return Var(!static_cast<const Bool*>(a.valor.get())->b);
+            }
+            return Var(); 
+        }
+
+        friend Var operator > (const Var& a, const Var& b) { return b<a; }
         friend Var operator != ( const Var& a, const Var& b ) { return (a<b) || (b<a); }
         friend Var operator == ( const Var& a, const Var& b ) { return !(a!=b); }
         friend Var operator <= ( const Var& a, const Var& b ) { return !(b<a); }
-        friend Var operator >= ( const Var& a, const Var& b ) { 
-            if (a.valor->t == T_BOOL and b.valor->t == T_BOOL) return !(a<b);
-            return Var();
-        }
+        friend Var operator >= ( const Var& a, const Var& b ) { return !(a<b); }
 
 
         // auxiliar functions
