@@ -30,3 +30,4 @@ int main( int argc, char* argv[] ) try {
 } catch( Var::Erro e ) {
     cout << "Erro fatal: " << e() << endl;
 }
+// 288,undefined,Xpalavra ,undefined,undefined,undefined,undefined,true,true

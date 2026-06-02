@@ -5,7 +5,7 @@
 
 using namespace std;
 
-enum Tipo { T_UNDEFINED, T_INT, T_DOUBLE, T_STR, T_OBJ, T_FUNC, T_BOOL };
+enum Tipo { T_UNDEFINED, T_INT, T_DOUBLE, T_STR, T_CHAR, T_OBJ, T_FUNC, T_BOOL };
 
 class Var;
 
@@ -19,6 +19,7 @@ class Undefined {
         virtual Var Subtrai(const Undefined* outro) const;
         virtual Var Multiplica(const Undefined* outro) const;
         virtual Var Divide(const Undefined* outro) const;
+        virtual Var Menor(const Undefined* outro) const;
 };
 
  
@@ -29,8 +30,8 @@ class Var {
         Var(double n) : valor( shared_ptr<Undefined>(new Double(n))) {}
         Var(const char* s) : valor(new String(string(s))) {}
         Var(string s) : valor(new String(s)) {}
+        Var(char c) : valor(new Char(c)) {}
         Var(bool b) : valor(new Bool(b)) {} 
-        Var(char c) : valor(new Int((int)c)) {}
 
         // Classes
         class Int: public Undefined {
@@ -60,6 +61,11 @@ class Var {
                 virtual Var Divide(const Undefined* outro) const override {
                     if (outro->t == T_INT) return Var(this->n / static_cast<const Int*>(outro)->n);
                     if (outro->t == T_DOUBLE) return Var(this->n / static_cast<const Double*>(outro)->d);
+                    return Var();
+                }
+
+                virtual Var Menor(const Undefined* outro) const override {
+                    if (outro->t == T_BOOL) return Var(this->n < static_cast<const Bool*>(outro)->b);
                     return Var();
                 }
         };
@@ -93,6 +99,11 @@ class Var {
                     if (outro->t == T_DOUBLE) return Var(this->d / static_cast<const Double*>(outro)->d);
                     return Var();
                 }
+
+                virtual Var Menor(const Undefined* outro) const override {
+                    if (outro->t == T_BOOL) return Var(this->d < static_cast<const Bool*>(outro)->b);
+                    return Var();
+                }
         };
         
         class String: public Undefined {
@@ -103,6 +114,20 @@ class Var {
 
                 virtual Var Somar(const Undefined* outro) const override {
                     if (outro->t == T_STR) return Var(this->s + static_cast<const String*>(outro)->s);
+                    return Var();
+                }
+        };
+
+        class Char: public Undefined {
+            public:
+                char c;
+                Char( char c ): Undefined(T_CHAR), c(c) {}
+                virtual void print(ostream& os) const override {os << c;}
+
+                virtual Var Somar(const Undefined* outro) const override {
+                    if (outro->t == T_CHAR) return Var(this->c + static_cast<const Char*>(outro)->c);
+                    if (outro->t == T_STR) return Var(this->c + static_cast<const String*>(outro)->s);
+                    if (outro->t == T_INT) return Var((int)this->c + static_cast<const Int*>(outro)->n);
                     return Var();
                 }
         };
@@ -228,10 +253,14 @@ class Var {
             return os;
         }
 
-        friend Var operator < ( const Var& a, const Var& b) {
-            if (a.turn_bool() < b.turn_bool()) return Var(true);
-            return Var(false);
+        friend Var operator < (const Var& a, const Var& b) {
+            return a.valor->Menor(b.valor.get());
         }
+
+        //friend Var operator < ( const Var& a, const Var& b) {
+        //    if (a.turn_bool() < b.turn_bool()) return Var(true);
+        //    return Var(false);
+        //}
 
         friend Var operator || ( const Var& a, const Var& b) {
             if (a.turn_bool()) return Var(true);
@@ -240,21 +269,43 @@ class Var {
         }
         
         friend Var operator && ( const Var& a, const Var& b) {
+            //cout << a.valor->t << " , " << b.valor->t << endl;
+            if (a.valor->t == T_BOOL and b.valor->t == T_BOOL) {
+                if (!a.turn_bool()) return Var(false);
+                if (!b.turn_bool()) return Var(false);
+                return Var(true);
+            }
+            return Var();
+        }
+/*
+        friend Var operator && ( const Var& a, const bool b) {
             if (!a.turn_bool()) return Var(false);
-            if (!b.turn_bool()) return Var(false);
+            if (!b) return Var(false);
             return Var(true);
         }
 
+        friend Var operator && ( const bool a, const Var& b) {
+            if (!a) return Var(false);
+            if (!b.turn_bool()) return Var(false);
+            return Var(true);
+        }
+*/
         friend Var operator ! ( const Var& a) {
             if (a.turn_bool()) return Var(false);
             return Var(true);
         }
 
-        friend Var operator > (const Var& a, const Var& b) { return b < a;}
+        friend Var operator > (const Var& a, const Var& b) {
+            if (a.valor->t == T_BOOL and b.valor->t == T_BOOL) return !(a<b);
+            return Var();
+        }
         friend Var operator != ( const Var& a, const Var& b ) { return (a<b) || (b<a); }
         friend Var operator == ( const Var& a, const Var& b ) { return !(a!=b); }
         friend Var operator <= ( const Var& a, const Var& b ) { return !(b<a); }
-        friend Var operator >= ( const Var& a, const Var& b ) { return !(a<b); }
+        friend Var operator >= ( const Var& a, const Var& b ) { 
+            if (a.valor->t == T_BOOL and b.valor->t == T_BOOL) return !(a<b);
+            return Var();
+        }
 
 
         // auxiliar functions
@@ -276,6 +327,8 @@ Var Undefined::Subtrai(const Undefined* outro) const {return Var();}
 Var Undefined::Multiplica(const Undefined* outro) const {return Var();}
 
 Var Undefined::Divide(const Undefined* outro) const {return Var();}
+
+Var Undefined::Menor(const Undefined* outro) const {return Var();}
 
 Var newObject() {
     Var obj;
