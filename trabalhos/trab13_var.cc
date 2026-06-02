@@ -5,7 +5,7 @@
 
 using namespace std;
 
-enum Tipo { T_UNDEFINED, T_INT, T_DOUBLE, T_STR, T_OBJ, T_FUNC };
+enum Tipo { T_UNDEFINED, T_INT, T_DOUBLE, T_STR, T_OBJ, T_FUNC, T_BOOL };
 
 class Var;
 
@@ -16,6 +16,9 @@ class Undefined {
         virtual ~Undefined() = default;
         virtual void print(ostream& os) const {os << "undefined";}
         virtual Var Somar(const Undefined* outro) const;
+        virtual Var Subtrai(const Undefined* outro) const;
+        virtual Var Multiplica(const Undefined* outro) const;
+        virtual Var Divide(const Undefined* outro) const;
 };
 
  
@@ -26,7 +29,7 @@ class Var {
         Var(double n) : valor( shared_ptr<Undefined>(new Double(n))) {}
         Var(const char* s) : valor(new String(string(s))) {}
         Var(string s) : valor(new String(s)) {}
-        Var(bool b) : valor(new Int(b ? 1 : 0)) {} 
+        Var(bool b) : valor(new Bool(b)) {} 
         Var(char c) : valor(new Int((int)c)) {}
 
         // Classes
@@ -39,7 +42,25 @@ class Var {
                 virtual Var Somar(const Undefined* outro) const override {
                     if (outro->t == T_INT) return Var(this->n + static_cast<const Int*>(outro)->n);
                     if (outro->t == T_DOUBLE) return Var(this->n + static_cast<const Double*>(outro)->d);
-                    throw Var::Erro("Não sei somar isso");
+                    return Var();
+                }
+                
+                virtual Var Subtrai(const Undefined* outro) const override {
+                    if (outro->t == T_INT) return Var(this->n - static_cast<const Int*>(outro)->n);
+                    if (outro->t == T_DOUBLE) return Var(this->n - static_cast<const Double*>(outro)->d);
+                    return Var();
+                }
+
+                virtual Var Multiplica(const Undefined* outro) const override {
+                    if (outro->t == T_INT) return Var(this->n * static_cast<const Int*>(outro)->n);
+                    if (outro->t == T_DOUBLE) return Var(this->n * static_cast<const Double*>(outro)->d);
+                    return Var();
+                }
+
+                virtual Var Divide(const Undefined* outro) const override {
+                    if (outro->t == T_INT) return Var(this->n / static_cast<const Int*>(outro)->n);
+                    if (outro->t == T_DOUBLE) return Var(this->n / static_cast<const Double*>(outro)->d);
+                    return Var();
                 }
         };
 
@@ -52,16 +73,38 @@ class Var {
                 virtual Var Somar(const Undefined* outro) const override {
                     if (outro->t == T_INT) return Var(this->d + static_cast<const Int*>(outro)->n);
                     if (outro->t == T_DOUBLE) return Var(this->d + static_cast<const Double*>(outro)->d);
-                    throw Var::Erro("Não sei somar isso");
+                    return Var();
+                }
+                
+                virtual Var Subtrai(const Undefined* outro) const override {
+                    if (outro->t == T_INT) return Var(this->d - static_cast<const Int*>(outro)->n);
+                    if (outro->t == T_DOUBLE) return Var(this->d - static_cast<const Double*>(outro)->d);
+                    return Var();
+                }
+
+                virtual Var Multiplica(const Undefined* outro) const override {
+                    if (outro->t == T_INT) return Var(this->d * static_cast<const Int*>(outro)->n);
+                    if (outro->t == T_DOUBLE) return Var(this->d * static_cast<const Double*>(outro)->d);
+                    return Var();
+                }
+
+                virtual Var Divide(const Undefined* outro) const override {
+                    if (outro->t == T_INT) return Var(this->d / static_cast<const Int*>(outro)->n);
+                    if (outro->t == T_DOUBLE) return Var(this->d / static_cast<const Double*>(outro)->d);
+                    return Var();
                 }
         };
         
         class String: public Undefined {
             public:
+                string s;
                 String( string s ): Undefined(T_STR), s(s) {}
                 virtual void print(ostream& os) const override {os << s;}
-            private:
-                string s;
+
+                virtual Var Somar(const Undefined* outro) const override {
+                    if (outro->t == T_STR) return Var(this->s + static_cast<const String*>(outro)->s);
+                    return Var();
+                }
         };
 
         class Function : public Undefined {
@@ -89,6 +132,21 @@ class Var {
                     }
                     os << " }";
                 }
+        };
+
+        class Bool: public Undefined {
+            public:
+                bool b;
+                Bool(bool b) : Undefined(T_BOOL), b(b) {}
+                virtual void print(ostream& os) const override {os << (b ? "true" : "false");}
+
+                virtual Var Somar(const Undefined*) const override {return Var();}
+
+                virtual Var Subtrai(const Undefined*) const override {return Var();}
+
+                virtual Var Multiplica(const Undefined*) const override {return Var();}
+
+                virtual Var Divide(const Undefined*) const override {return Var();}
         };
 
         class Erro {
@@ -122,8 +180,20 @@ class Var {
             return *this;
         }
 
-        Var operator+(const Var& outro) const {
-            return valor->Somar(outro.valor.get());
+        friend Var operator+(const Var& a, const Var& b) {
+            return a.valor->Somar(b.valor.get());
+        }
+
+        friend Var operator-(const Var& a, const Var& b) {
+            return a.valor->Subtrai(b.valor.get());
+        }
+
+        friend Var operator*(const Var& a, const Var& b) {
+            return a.valor->Multiplica(b.valor.get());
+        }
+
+        friend Var operator/(const Var& a, const Var& b) {
+            return a.valor->Divide(b.valor.get());
         }
 
         Var operator[](string s) const {
@@ -141,6 +211,14 @@ class Var {
             return Var();
         }
 
+        bool turn_bool() const {
+            if (valor->t == T_UNDEFINED) return false;
+            if (valor->t == T_INT) return static_cast<Int*>(valor.get())->n != 0;
+            if (valor->t == T_DOUBLE) return static_cast<Double*>(valor.get())->d != 0.0;
+
+            return true;
+        }
+
         friend ostream& operator<<(ostream& os, const Var& v) {
             if (v.valor) {
                 v.valor->print(os);
@@ -150,7 +228,29 @@ class Var {
             return os;
         }
 
-        friend Var operator>(const Var& a, const Var& b) { return b < a;}
+        friend Var operator < ( const Var& a, const Var& b) {
+            if (a.turn_bool() < b.turn_bool()) return Var(true);
+            return Var(false);
+        }
+
+        friend Var operator || ( const Var& a, const Var& b) {
+            if (a.turn_bool()) return Var(true);
+            if (b.turn_bool()) return Var(true);
+            return Var(false);
+        }
+        
+        friend Var operator && ( const Var& a, const Var& b) {
+            if (!a.turn_bool()) return Var(false);
+            if (!b.turn_bool()) return Var(false);
+            return Var(true);
+        }
+
+        friend Var operator ! ( const Var& a) {
+            if (a.turn_bool()) return Var(false);
+            return Var(true);
+        }
+
+        friend Var operator > (const Var& a, const Var& b) { return b < a;}
         friend Var operator != ( const Var& a, const Var& b ) { return (a<b) || (b<a); }
         friend Var operator == ( const Var& a, const Var& b ) { return !(a!=b); }
         friend Var operator <= ( const Var& a, const Var& b ) { return !(b<a); }
@@ -169,9 +269,13 @@ class Var {
         shared_ptr<Undefined> valor;
 };
 
-Var Undefined::Somar(const Undefined* outro) const {
-    return Var();
-}
+Var Undefined::Somar(const Undefined* outro) const {return Var();}
+
+Var Undefined::Subtrai(const Undefined* outro) const {return Var();}
+
+Var Undefined::Multiplica(const Undefined* outro) const {return Var();}
+
+Var Undefined::Divide(const Undefined* outro) const {return Var();}
 
 Var newObject() {
     Var obj;
