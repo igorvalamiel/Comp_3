@@ -24,7 +24,7 @@ class Undefined {
         virtual Var Menor(const Undefined* outro) const;
 };
 
- 
+
 class Var {
     public:
         Var() : valor( new Undefined() ) {}
@@ -33,7 +33,9 @@ class Var {
         Var(const char* s) : valor(new String(string(s))) {}
         Var(string s) : valor(new String(s)) {}
         Var(char c) : valor(new Char(c)) {}
-        Var(bool b) : valor(new Bool(b)) {} 
+        Var(bool b) : valor(new Bool(b)) {}
+        template<class F>
+        Var(F f) : valor(shared_ptr<Undefined>(new Function([f](Var x) { return f(x); }))) {}
 
         // Classes
         class Int: public Undefined {
@@ -155,9 +157,9 @@ class Var {
             public:                
                 Function(function<Var(Var)> f): Undefined(T_FUNC), func(f) {}
                 
-                virtual void print(ostream& os) const override { os << "[Function]"; }
+                virtual void print(ostream& os) const override { os << "function"; }
                 
-                Var executar(Var arg) { return func(arg); }
+                Var executar(Var arg) const { return func(arg); }
 
             private:
                 function<Var(Var)> func;   
@@ -229,6 +231,12 @@ class Var {
             return *this;
         }
 
+        template<class F>
+        Var& operator=(F f) {
+            valor = shared_ptr<Undefined>(new Function([f](Var x) { return f(x); }));
+            return *this;
+        }
+
         friend Var operator+(const Var& a, const Var& b) {
             return a.valor->Somar(b.valor.get());
         }
@@ -252,7 +260,7 @@ class Var {
                 
                 auto it = objPtr->atributos.find(s);
                 if (it != objPtr->atributos.end()) { return it->second; }
-                throw Erro("Essa variável não pode ser usada como função");
+                return Var();
             }
             throw Erro("Essa variável não é um objeto");
         }
@@ -266,9 +274,9 @@ class Var {
             throw Erro("Essa variável não é um objeto");
         }
 
-        Var operator()(Var arg) {
+        Var operator()(Var arg) const {
             if (valor->t == T_FUNC) {
-                Function* fPtr = static_cast<Function*>(valor.get());
+                const Function* fPtr = static_cast<const Function*>(valor.get());
                 return fPtr->executar(arg);
             }
             throw Erro("Essa variável não pode ser usada como função");
