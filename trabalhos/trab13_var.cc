@@ -122,6 +122,7 @@ class Var {
 
                 virtual Var Somar(const Undefined* outro) const override {
                     if (outro->t == T_STR) return Var(this->s + static_cast<const String*>(outro)->s);
+                    if (outro->t == T_CHAR) return Var(this->s + static_cast<const Char*>(outro)->c);
                     return Var();
                 }
 
