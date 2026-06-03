@@ -139,8 +139,8 @@ class Var {
                 virtual void print(ostream& os) const override {os << c;}
 
                 virtual Var Somar(const Undefined* outro) const override {
-                    if (outro->t == T_CHAR) return Var(this->c + static_cast<const Char*>(outro)->c);
-                    if (outro->t == T_STR) return Var(this->c + static_cast<const String*>(outro)->s);
+                    if (outro->t == T_CHAR) return Var(string(1, this->c) + static_cast<const Char*>(outro)->c);
+                    if (outro->t == T_STR) return Var(string(1, this->c) + static_cast<const String*>(outro)->s);
                     if (outro->t == T_INT) return Var((int)this->c + static_cast<const Int*>(outro)->n);
                     return Var();
                 }
