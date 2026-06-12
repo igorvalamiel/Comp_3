@@ -19,7 +19,7 @@ int main() {
     
     /* TESTCASE-PLACE-HOLDER */
     vector< vector<int> > m{ { 1, 2, 3 }, { 0, 3, 7 }, { 1, 3 } };
-    m | []( auto v ) { return v[0] != 0; } | [x]( auto v ) { v + 7 | cout << x << ' '; };
+    m | []( auto v ) { return v[0] != 0; } | ( x | cout << x << ' ' );
     
     return 0;
 }

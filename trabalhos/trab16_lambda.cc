@@ -54,7 +54,7 @@ template <typename Op1, typename Op2>
 class Modulo {
 public:
     Modulo(Op1 a, Op2 b) : a(a), b(b) {}
-    
+
     template <typename K>
     auto operator()(K valor) { return a(valor) % b(valor); }
 private:
@@ -65,7 +65,7 @@ template <typename Op1, typename Op2>
 class Igual {
 public:
     Igual(Op1 a, Op2 b) : a(a), b(b) {}
-    
+
     template <typename K>
     auto operator()(K valor) { return a(valor) == b(valor); }
 private:
@@ -96,6 +96,19 @@ public:
     }
 };
 
+template <typename Op1, typename Op2>
+class Pipe {
+public:
+    Pipe(Op1 a, Op2 b) : a(a), b(b) {}
+    
+    template <typename K>
+    auto operator()(K&& valor) {
+        return a(forward<K>(valor)) | b;
+    }
+private:
+    Op1 a; Op2 b;
+};
+
 template <typename T> struct is_my_expr : false_type {};
 template <> struct is_my_expr<X> : true_type {};
 template <typename A, typename B> struct is_my_expr<Soma<A, B>> : true_type {};
@@ -104,6 +117,7 @@ template <typename A, typename B> struct is_my_expr<Modulo<A, B>> : true_type {}
 template <typename A, typename B> struct is_my_expr<Igual<A, B>> : true_type {};
 template <typename T> struct is_my_expr<Cte<T>> : true_type {};
 template <typename L, typename R> struct is_my_expr<print<L, R>> : true_type {};
+template <typename A, typename B> struct is_my_expr<Pipe<A, B>> : true_type {};
 
 template <typename T>
 inline constexpr bool is_my_expr_v = is_my_expr<decay_t<T>>::value;
@@ -169,4 +183,9 @@ auto operator % (Op1&& a, Op2&& b) {
 template <typename Op1, typename Op2, typename = enable_if_t<is_my_expr_v<Op1> || is_my_expr_v<Op2>>>
 auto operator == (Op1&& a, Op2&& b) { 
     return Igual(wrap(forward<Op1>(a)), wrap(forward<Op2>(b))); 
+}
+
+template <typename Op1, typename Op2, typename = enable_if_t<is_my_expr_v<Op1>>>
+auto operator | (Op1&& a, Op2&& b) {
+    return Pipe(forward<Op1>(a), forward<Op2>(b));
 }
