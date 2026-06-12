@@ -35,6 +35,18 @@ inline constexpr bool is_my_expr_v = is_my_expr<decay_t<T>>::value;
 template <typename T>
 auto wrap(T&& val);
 
+template <typename T>
+vector<T> operator+(vector<T> v, const T& elemento) {
+    v.push_back(elemento);
+    return v;
+}
+
+template <typename T>
+vector<T> operator+(const T& elemento, vector<T> v) {
+    v.insert(v.begin(), elemento);
+    return v;
+}
+
 class X {
 public:
     template <typename K>
