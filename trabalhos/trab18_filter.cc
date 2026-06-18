@@ -2,6 +2,37 @@
 
 using namespace std;
 
+
+class Intervalo {
+    public:
+        Intervalo (int value_a): begin_value(value_a), end_value(value_a-2) {}
+        Intervalo (int value_a, int value_b): begin_value(value_a), end_value(value_b) {}
+
+        class Iterador {
+            public:
+                Iterador (int v) : atual(v) {}
+
+                int operator *() const { return atual; }
+
+                int operator ++() { return ++atual;} // prefixado ( ++a )
+
+                int operator ++(int) { return atual++;} // posfixado ( a++ )
+                
+                bool operator != ( Iterador i) const { return atual < i.atual; }
+
+            private:
+                int atual;
+        };
+
+        Iterador begin() const {return begin_value;}
+
+        Iterador end() const { return end_value;}
+
+    private:
+        int begin_value, end_value;
+};
+
+
 template<typename I, typename F>
 auto operator | (const I& item, F funcao) {
 
