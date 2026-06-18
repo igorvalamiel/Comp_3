@@ -1,0 +1,119 @@
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+Teste 1
+    --- Input ---
+    Var tab[] = { Var(), true, 10, '2', 0, '0', 'X', newObject(), "", "palavra", " 0 " };
+    for( auto& a: tab )
+      cout << "Valor=" << a << ":" << a.asString() << "," << a.asBool() << "," << !!a << "," << Var( a.isNumber() ) << endl;
+
+    --- Expected output (exact text)---
+    Valor=undefined:undefined,0,false,false
+    Valor=true:true,1,true,true
+    Valor=10:10,1,true,true
+    Valor=2:2,1,true,true
+    Valor=0:0,0,false,true
+    Valor=0:0,1,true,true
+    Valor=X:X,1,true,false
+    Valor=object:object,1,true,false
+    Valor=:,0,false,true
+    Valor=palavra:palavra,1,true,false
+    Valor= 0 : 0 ,1,true,true
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+Teste 2
+    --- Input ---
+    Var a, sq = []( int n ){ return n*n; };
+    a = newArray();
+    for( Var b = 0; (b < 10).asBool(); b = b + 1 )
+      a[b] = sq( b );
+    for( int i = 0; i < 10; i++ )
+      cout << a[i] << ";";
+    cout << endl;
+
+    --- Expected output (exact text)---
+    0;1;4;9;16;25;36;49;64;81;
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+Teste 3
+    --- Input ---
+    Var a = newArray(), b = 0;
+    a[b] = 0;
+    b[a[0]] = "a";
+
+    --- Expected output (exact text)---
+    Erro fatal: Essa variável não é um objeto
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+Teste 4
+    --- Input ---
+    Var a = newArray(), b;
+    a["sqr"] = []( int n ){ return n*n; }; 
+    for( b = 0; (b < 10).asBool(); b = b + 1 )
+      a[b] = a["sqr"]( b );
+    cout << a[5];
+
+    --- Expected output (exact text)---
+    25
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+Teste 5
+    --- Input ---
+    Var a = newArray(), b = -2, c = "-2";
+    a[2] = 10;
+    a[b] = 5.1;
+    a[a[c]] = "saida";
+    cout << a[0] << "," << a[1] << "," << a[2] << "," << a[-2] << "," << a[5.1] << endl;
+
+    --- Expected output (exact text)---
+    undefined,undefined,10,5.1,saida
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+Teste 6
+    --- Input ---
+    Var a, b;
+    a = newArray();
+    for( b = 0; (b < 5).asBool(); b = b + 1 )
+      a[b] = b + 1;
+    a.forEach( []( Var n ){ cout << n.asString() + "!"; } );
+    cout << endl;
+
+    --- Expected output (exact text)---
+    1!2!3!4!5!
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+Teste 7
+    --- Input ---
+    Var a, b;
+    a = newArray();
+    a["sqr"] = []( Var n )->Var{ return n*n; }; 
+    for( b = 0; (b < 10).asBool(); b = b + 1 )
+      a[b] = a["sqr"]( b );
+    auto pares = []( auto n ){ return n%2 == 0; };
+    a.filter( pares ).forEach( []( Var n ){ cout << n << " "; } );
+    cout << endl;
+
+    --- Expected output (exact text)---
+    0 4 16 36 64 
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+Teste 8
+    --- Input ---
+    Var a, b;
+    a = newArray();
+    Var pares = []( auto n ){ return n%2 == 0; };
+    for( b = 0; (b < 10).asBool(); b = b + 1 )
+      a[b] = b*b;
+    auto indexOf = []( const Var& array, Var valor ) {
+      int n = 0;
+      int pos = -1;
+      array.forEach( [&n,&pos,valor](auto x) { 
+        if( pos == -1 ) { 
+          if( (x == valor).asBool() ) 
+            pos = n; 
+          n++; 
+        } 
+      } ); 
+      return pos;
+    };
+    cout << (indexOf( a, 36 ) == a.indexOf( 36 ) ) << endl;
+    cout << indexOf( a.filter( pares ), "A" ) << endl;
+    a[11] = 'A';
+    cout << a.indexOf( "A" ) << endl;
+
+    --- Expected output (exact text)---
+    true
+    -1
+    11
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~

@@ -7,7 +7,7 @@
 
 using namespace std;
 
-enum Tipo { T_UNDEFINED, T_INT, T_DOUBLE, T_STR, T_CHAR, T_OBJ, T_FUNC, T_BOOL };
+enum Tipo { T_UNDEFINED, T_INT, T_DOUBLE, T_STR, T_CHAR, T_OBJ, T_FUNC, T_BOOL, T_ARR};
 
 class Var;
 
@@ -181,6 +181,17 @@ class Var {
                 }
         };
 
+        class Array: public Object {
+            public:
+                vector<Var> lista;
+                Array(): Object() {
+                    this->t=T_ARR;
+
+                    for (auto i : this->atributos) { lista.push_back(i); }
+                }
+
+        };
+
         class Bool: public Undefined {
             public:
                 bool b;
@@ -254,7 +265,7 @@ class Var {
             return a.valor->Divide(b.valor.get());
         }
 
-        // lendo
+        // lendo OBJ
         Var operator[](string s) const {
             if (valor->t == T_OBJ) {
                 const Object* objPtr = static_cast<const Object*>(valor.get());
@@ -266,11 +277,32 @@ class Var {
             throw Erro("Essa variável não é um objeto");
         }
 
-        // escrevendo
+        // escrevendo OBJ
         Var& operator[](string s) {
             if (valor->t == T_OBJ) {
                 Object* objPtr = static_cast<Object*>(valor.get());
                 return objPtr->atributos[s];
+            }
+            throw Erro("Essa variável não é um objeto");
+        }
+
+        // lendo ARR7
+        Var operator[](int n) const {
+            if (valor->t == T_ARR) {
+                const Array* arrPtr = static_cast<const Array*>(valor.get());
+                
+                auto it = arrPtr->lista[n];
+                if (n > (int)arrPtr->lista.size()) { return arrPtr->lista[n].type(); }
+                return Var();
+            }
+            throw Erro("Essa variável não é um objeto");
+        }
+
+        // Escrevendo ARR
+        Var& operator[](int n) {
+            if (valor->t == T_ARR) {
+                Array* arrPtr = static_cast<Array*>(valor.get());
+                return arrPtr->lista[n];
             }
             throw Erro("Essa variável não é um objeto");
         }
@@ -282,6 +314,8 @@ class Var {
             }
             throw Erro("Essa variável não pode ser usada como função");
         }
+
+
 
         friend ostream& operator<<(ostream& os, const Var& v) {
             if (v.valor->t == T_OBJ) {
@@ -339,9 +373,15 @@ class Var {
             return v;
         }
 
+        static Var createARR() {
+            Var v;
+            v.valor = shared_ptr<Undefined>( new Array() );
+            return v;
+        }
+
         // só pra me ajudar no debug (acabou q vou usar kakakakka)
         string type() const {
-            vector <string> types =  {"undefined", "int", "double", "string", "char", "object", "function", "bool"};
+            vector <string> types =  {"undefined", "int", "double", "string", "char", "object", "function", "bool", "array"};
             return types[valor->t];
         }
 
@@ -365,3 +405,7 @@ Var newObject() {
     return obj.createOBJ();
 }
 
+Var newArray() {
+    Var arr;
+    return arr.createARR();
+}
