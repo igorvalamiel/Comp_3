@@ -265,6 +265,32 @@ class Var {
             return a.valor->Divide(b.valor.get());
         }
 
+        // lendo OBJ+ARR
+        Var operator[](Var v) const {
+            if (v.type() == "string") {
+                if (valor->t == T_OBJ) {
+                    const Object* objPtr = static_cast<const Object*>(valor.get());
+                    
+                    string s = v.valor;
+                    auto it = objPtr->atributos.find(s);
+                    if (it != objPtr->atributos.end()) { return it->second; }
+                    return Var();
+                }
+                throw Erro("Essa variável não é um objeto");
+            } else if (v.type() == "int") {
+                if (valor->t == T_ARR) {
+                const Array* arrPtr = static_cast<const Array*>(valor.get());
+                
+                int n = v.valor;
+                auto it = arrPtr->lista[n];
+                if (n > (int)arrPtr->lista.size()) { return arrPtr->lista[n].type(); }
+                return Var();
+            }
+            throw Erro("Essa variável não é um objeto");
+            }
+            throw Erro("Essa variável não é um objeto");
+        }
+/*
         // lendo OBJ
         Var operator[](string s) const {
             if (valor->t == T_OBJ) {
@@ -314,7 +340,7 @@ class Var {
             }
             throw Erro("Essa variável não pode ser usada como função");
         }
-
+*/
 
 
         friend ostream& operator<<(ostream& os, const Var& v) {
