@@ -14,7 +14,7 @@ class Intervalo {
                 int operator *() const { return atual; }
                 int operator ++() { return ++atual;} // prefixado ( ++a )
                 int operator ++(int) { return atual++;} // posfixado ( a++ )
-                bool operator != ( Iterador i) const { return atual < i.atual; }
+                bool operator != ( Iterador i) const { return atual != i.atual; }
 
             private:
                 int atual;
