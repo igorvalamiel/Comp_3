@@ -49,7 +49,7 @@ auto operator|(const I& item, NPrimeiros np) {
 
 template<typename Range, typename F>
 struct LazyFilterRange {
-    const Range& s;
+    Range s;
     F f;
 
     using sIter = decltype(::begin(declval<const Range&>()));
@@ -74,25 +74,46 @@ struct LazyFilterRange {
 };
 
 
-template<typename I, typename F>
-auto operator | (const I& item, F funcao) {
+template<typename Range, typename F>
+struct MakeLazy {
+    Range s;
+    F f;
 
+    using sIter = decltype(::begin(declval<const Range&>()));
+
+    struct Iterator {
+        sIter atual;
+        F* f;
+
+        auto  operator*()  const { return (*f)(*atual); }
+        Iterator& operator++() { ++atual; return *this; }
+        bool  operator!=(const Iterator& o) const { return atual != o.atual; }
+    };
+
+    Iterator begin() const { return { ::begin(s), const_cast<F*>(&f) }; }
+    Iterator end()   const { return { ::end(s),   const_cast<F*>(&f) }; }
+};
+
+
+template<typename I, typename F>
+enable_if_t<is_same_v<invoke_result_t<F, decay_t<decltype(*begin(declval<const I&>()))>>, void>>
+operator|(const I& item, F funcao) {
+    for (const auto& i : item)
+        invoke(funcao, i);
+}
+
+
+template<typename I, typename F>
+enable_if_t<!is_same_v<invoke_result_t<F, decay_t<decltype(*begin(declval<const I&>()))>>, void>,
+            conditional_t<is_same_v<invoke_result_t<F, decay_t<decltype(*begin(declval<const I&>()))>>, bool>,
+                          LazyFilterRange<I,F>,
+                          MakeLazy<I,F>>>
+operator|(const I& item, F funcao) {
     using T = decay_t<decltype(*begin(item))>;
     using RetornoFuncao = invoke_result_t<F, T>;
 
-    if constexpr (is_same_v<RetornoFuncao, bool>) {
+    if constexpr (is_same_v<RetornoFuncao, bool>)
         return LazyFilterRange<I, F>{ item, funcao };
-    } 
-    else if constexpr (is_same_v<RetornoFuncao, void>) {
-        for (const auto& i : item) {
-            invoke(funcao, i);
-        }
-    }
-    else {
-        vector<RetornoFuncao> return_list;
-        for (const auto& i : item) {
-            return_list.push_back(invoke(funcao, i));
-        }
-        return return_list;
-    }
+    else
+        return MakeLazy<I, F>{ item, funcao };
 }

@@ -1,111 +1,41 @@
 #include <functional>
+
 using namespace std;
 
-// ─── Intervalo ────────────────────────────────────────────────────────────────
+
 class Intervalo {
-public:
-    Intervalo(int a)        : begin_value(a), end_value(a-2) {}
-    Intervalo(int a, int b) : begin_value(a), end_value(b)   {}
-
-    class Iterador {
     public:
-        Iterador(int v) : atual(v) {}
-        int operator*()        const { return atual; }
-        int operator++()             { return ++atual; }
-        int operator++(int)          { return atual++; }
-        bool operator!=(Iterador i)  const { return atual < i.atual; }
+        Intervalo (int value_a): begin_value(value_a), end_value(value_a-2) {}
+        Intervalo (int value_a, int value_b): begin_value(value_a), end_value(value_b) {}
+
+        class Iterador {
+            public:
+                Iterador (int v) : atual(v) {}
+                int operator *() const { return atual; }
+                int operator ++() { return ++atual;}
+                int operator ++(int) { return atual++;}
+                bool operator != ( Iterador i) const { return atual < i.atual; }
+            private:
+                int atual;
+        };
+
+        Iterador begin() const {return begin_value;}
+        Iterador end() const {return end_value;}
+
     private:
-        int atual;
-    };
-
-    Iterador begin() const { return begin_value; }
-    Iterador end()   const { return end_value;   }
-
-private:
-    int begin_value, end_value;
+        int begin_value, end_value;
 };
 
-// ─── LazyFilterRange ──────────────────────────────────────────────────────────
-// Wraps any range + predicate; iterates lazily skipping non-matching elements.
-template<typename Range, typename F>
-struct LazyFilterRange {
-    const Range& src;
-    F f;
 
-    using SrcIter = decltype(::begin(declval<const Range&>()));
-
-    struct Iter {
-        SrcIter cur, last;
-        F* f;
-
-        void skip() { while (cur != last && !(*f)(*cur)) ++cur; }
-
-        auto  operator*()  const { return *cur; }
-        Iter& operator++() { ++cur; skip(); return *this; }
-        bool  operator!=(const Iter& o) const { return cur != o.cur; }
-    };
-
-    Iter begin() const {
-        auto it = Iter{ ::begin(src), ::end(src), const_cast<F*>(&f) };
-        it.skip();
-        return it;
-    }
-    Iter end() const { return { ::end(src), ::end(src), const_cast<F*>(&f) }; }
-};
-
-// ─── LazyMapRange ─────────────────────────────────────────────────────────────
-// Wraps any range + transform; applies f lazily on dereference.
-template<typename Range, typename F>
-struct LazyMapRange {
-    const Range& src;
-    F f;
-
-    using SrcIter = decltype(::begin(declval<const Range&>()));
-
-    struct Iter {
-        SrcIter cur;
-        F* f;
-
-        auto  operator*()  const { return (*f)(*cur); }
-        Iter& operator++() { ++cur; return *this; }
-        bool  operator!=(const Iter& o) const { return cur != o.cur; }
-    };
-
-    Iter begin() const { return { ::begin(src), const_cast<F*>(&f) }; }
-    Iter end()   const { return { ::end(src),   const_cast<F*>(&f) }; }
-};
-
-// ─── operator|(range, F) — lazy filter or map; eager sink for void ────────────
-template<typename I, typename F>
-auto operator|(const I& item, F funcao) {
-    using T            = decay_t<decltype(*::begin(item))>;
-    using RetornoFuncao = invoke_result_t<F, T>;
-
-    if constexpr (is_same_v<RetornoFuncao, bool>) {
-        // filter → lazy
-        return LazyFilterRange<I, F>{ item, funcao };
-    }
-    else if constexpr (is_same_v<RetornoFuncao, void>) {
-        // sink → eager, no return
-        for (const auto& i : item)
-            invoke(funcao, i);
-    }
-    else {
-        // transform → lazy
-        return LazyMapRange<I, F>{ item, funcao };
-    }
-}
-
-// ─── NPrimeiros — eager, collects first n elements from any range ─────────────
 class NPrimeiros {
-public:
-    NPrimeiros(int n) : counter(n) {}
-    int counter;
+    public:
+        NPrimeiros(int n) : counter(n) {}
+        int counter;
 };
 
 template<typename I>
 auto operator|(const I& item, NPrimeiros np) {
-    using T = decay_t<decltype(*::begin(item))>;
+    using T = decay_t<decltype(*begin(item))>;
     vector<T> result;
     result.reserve(np.counter);
     for (const auto& v : item) {
@@ -113,4 +43,77 @@ auto operator|(const I& item, NPrimeiros np) {
         if (static_cast<int>(result.size()) == np.counter) break;
     }
     return result;
+}
+
+
+template<typename Range, typename F>
+struct LazyFilterRange {
+    const Range& s;
+    F f;
+
+    using sIter = decltype(::begin(declval<const Range&>()));
+
+    struct Iterator {
+        sIter atual, ultimo;
+        F* f;
+
+        void skip() { while (atual != ultimo && !(*f)(*atual)) ++atual; }
+
+        auto      operator*()  const { return *atual; }
+        Iterator& operator++() { ++atual; skip(); return *this; }
+        bool      operator!=(const Iterator& o) const { return atual != o.atual; }
+    };
+
+    Iterator begin() const {
+        auto it = Iterator{ ::begin(s), ::end(s), const_cast<F*>(&f) };
+        it.skip();
+        return it;
+    }
+    Iterator end() const { return { ::end(s), ::end(s), const_cast<F*>(&f) }; }
+};
+
+
+template<typename Range, typename F>
+struct MakeLazy {
+    const Range& s;
+    F f;
+
+    using sIter = decltype(::begin(declval<const Range&>()));
+
+    struct Iterator {
+        sIter atual;
+        F* f;
+
+        auto      operator*()  const { return (*f)(*atual); }
+        Iterator& operator++() { ++atual; return *this; }
+        bool      operator!=(const Iterator& o) const { return atual != o.atual; }
+    };
+
+    Iterator begin() const { return { ::begin(s), const_cast<F*>(&f) }; }
+    Iterator end()   const { return { ::end(s),   const_cast<F*>(&f) }; }
+};
+
+
+// ── void sink ─────────────────────────────────────────────────────────────────
+template<typename I, typename F>
+enable_if_t<is_same_v<invoke_result_t<F, decay_t<decltype(*begin(declval<const I&>()))>>, void>>
+operator|(const I& item, F funcao) {
+    for (const auto& i : item)
+        invoke(funcao, i);
+}
+
+// ── filter / transform ────────────────────────────────────────────────────────
+template<typename I, typename F>
+enable_if_t<!is_same_v<invoke_result_t<F, decay_t<decltype(*begin(declval<const I&>()))>>, void>,
+            conditional_t<is_same_v<invoke_result_t<F, decay_t<decltype(*begin(declval<const I&>()))>>, bool>,
+                          LazyFilterRange<I,F>,
+                          MakeLazy<I,F>>>
+operator|(const I& item, F funcao) {
+    using T = decay_t<decltype(*begin(item))>;
+    using RetornoFuncao = invoke_result_t<F, T>;
+
+    if constexpr (is_same_v<RetornoFuncao, bool>)
+        return LazyFilterRange<I, F>{ item, funcao };
+    else
+        return MakeLazy<I, F>{ item, funcao };
 }
