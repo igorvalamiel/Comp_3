@@ -47,6 +47,32 @@ auto operator|(const I& item, NPrimeiros np) {
     return result;
 }
 
+template<typename Range, typename F>
+struct LazyFilterRange {
+    const Range& s;
+    F f;
+
+    using sIter = decltype(::begin(declval<const Range&>()));
+
+    struct Iterator {
+        sIter atual, ultimo;
+        F* f;
+
+        void skip() { while (atual != ultimo && !(*f)(*atual)) ++atual; }
+
+        auto  operator*()  const { return *atual; }
+        Iterator& operator++() { ++atual; skip(); return *this; }
+        bool  operator!=(const Iterator& o) const { return atual != o.atual; }
+    };
+
+    Iterator begin() const {
+        auto it = Iterator{ ::begin(s), ::end(s), const_cast<F*>(&f) };
+        it.skip();
+        return it;
+    }
+    Iterator end() const { return { ::end(s), ::end(s), const_cast<F*>(&f) }; }
+};
+
 
 template<typename I, typename F>
 auto operator | (const I& item, F funcao) {
@@ -55,13 +81,7 @@ auto operator | (const I& item, F funcao) {
     using RetornoFuncao = invoke_result_t<F, T>;
 
     if constexpr (is_same_v<RetornoFuncao, bool>) {
-        vector<T> return_list;
-        for (const auto& i : item) {
-            if (invoke(funcao, i)) {
-                return_list.push_back(i);
-            }
-        }
-        return return_list;
+        return LazyFilterRange<I, F>{ item, funcao };
     } 
     else if constexpr (is_same_v<RetornoFuncao, void>) {
         for (const auto& i : item) {
