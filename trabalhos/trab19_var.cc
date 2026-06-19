@@ -400,10 +400,8 @@ class Var {
             if (valor->t == T_ARR) {
                 Array* arrPtr = static_cast<Array*>(valor.get());
                 
-                if (v.type() == "int" || v.type() == "double") {
-                    int n = static_cast<int>(v.asNumber());
-                    if (n < 0) throw Erro("Vou arruamar ainda");
-                    
+                if ((v.type() == "int" || v.type() == "double") && v.asNumber() >= 0) {
+                    int n = static_cast<int>(v.asNumber());                    
                     if (n >= (int)arrPtr->lista.size()) { arrPtr->lista.resize(n + 1); }
                     return arrPtr->lista[n];
                 } else {
