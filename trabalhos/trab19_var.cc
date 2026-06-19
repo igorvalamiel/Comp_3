@@ -419,7 +419,7 @@ class Var {
                 string s = v.asString();
                 return objPtr->atributos[s];
             }
-            throw Erro("Essa variável não suporta indexação (não é Objeto ou Array)");
+            throw Erro("Essa variável não é um objeto");
         }
 
         Var operator()(Var arg) const {
