@@ -200,15 +200,14 @@ class Var {
         };
 
         class Function : public Undefined {
-            public:                
+            public:
+                function<Var(Var)> func; 
+
                 Function(function<Var(Var)> f): Undefined(T_FUNC), func(f) {}
                 
                 virtual void print(ostream& os) const override { os << "function"; }
                 
                 Var executar(Var arg) const { return func(arg); }
-
-            private:
-                function<Var(Var)> func;   
         };
 
 
@@ -320,6 +319,14 @@ class Var {
             return false;
         }
 
+        operator int() const { return this->asNumber(); }
+        
+        operator double() const { return this->asNumber(); }
+        
+        operator bool() const { return this->asBool(); }
+        
+        operator std::string() const { return this->asString(); }
+
         
         // Operators
         Var& operator = (int n) {
@@ -366,13 +373,12 @@ class Var {
 
 
         // lendo OBJ+ARR
-        /*
         Var operator[](Var v) const {
             if (v.type() == "string") {
                 if (valor->t == T_OBJ) {
                     const Object* objPtr = static_cast<const Object*>(valor.get());
                     
-                    string s = v.valor;
+                    string s = v.valor->asString();
                     auto it = objPtr->atributos.find(s);
                     if (it != objPtr->atributos.end()) { return it->second; }
                     return Var();
@@ -382,7 +388,7 @@ class Var {
                 if (valor->t == T_ARR) {
                 const Array* arrPtr = static_cast<const Array*>(valor.get());
                 
-                int n = v.valor;
+                int n = v.valor->asNumber();
                 auto it = arrPtr->lista[n];
                 if (n > (int)arrPtr->lista.size()) { return arrPtr->lista[n].type(); }
                 return Var();
@@ -391,58 +397,38 @@ class Var {
             }
             throw Erro("Essa variável não é um objeto");
         }
-        */
-/*
-        // lendo OBJ
-        Var operator[](string s) const {
-            if (valor->t == T_OBJ) {
-                const Object* objPtr = static_cast<const Object*>(valor.get());
-                
-                auto it = objPtr->atributos.find(s);
-                if (it != objPtr->atributos.end()) { return it->second; }
-                return Var();
-            }
-            throw Erro("Essa variável não é um objeto");
-        }
 
-        // escrevendo OBJ
-        Var& operator[](string s) {
-            if (valor->t == T_OBJ) {
-                Object* objPtr = static_cast<Object*>(valor.get());
-                return objPtr->atributos[s];
-            }
-            throw Erro("Essa variável não é um objeto");
-        }
-
-        // lendo ARR7
-        Var operator[](int n) const {
-            if (valor->t == T_ARR) {
-                const Array* arrPtr = static_cast<const Array*>(valor.get());
-                
-                auto it = arrPtr->lista[n];
-                if (n > (int)arrPtr->lista.size()) { return arrPtr->lista[n].type(); }
-                return Var();
-            }
-            throw Erro("Essa variável não é um objeto");
-        }
-
-        // Escrevendo ARR
-        Var& operator[](int n) {
+        // escrevendo OBJ+ARR
+        Var& operator[](const Var& v) {
             if (valor->t == T_ARR) {
                 Array* arrPtr = static_cast<Array*>(valor.get());
-                return arrPtr->lista[n];
+                
+                if (v.type() == "int" || v.type() == "double") {
+                    int n = static_cast<int>(v.asNumber());
+                    if (n < 0) throw Erro("Vou arruamar ainda");
+                    
+                    if (n >= (int)arrPtr->lista.size()) { arrPtr->lista.resize(n + 1); }
+                    return arrPtr->lista[n];
+                } else {
+                    string s = v.asString();
+                    return arrPtr->atributos[s];
+                }
+            } 
+            else if (valor->t == T_OBJ) {
+                Object* objPtr = static_cast<Object*>(valor.get());
+                string s = v.asString();
+                return objPtr->atributos[s];
             }
-            throw Erro("Essa variável não é um objeto");
+            throw Erro("Essa variável não suporta indexação (não é Objeto ou Array)");
         }
 
         Var operator()(Var arg) const {
-            if (valor->t == T_FUNC) {
-                const Function* fPtr = static_cast<const Function*>(valor.get());
-                return fPtr->executar(arg);
+            auto f = std::dynamic_pointer_cast<Function>(valor);
+            if (f) {
+                return f->func(arg);
             }
-            throw Erro("Essa variável não pode ser usada como função");
+            return Var();
         }
-*/
 
 
         friend ostream& operator<<(ostream& os, const Var& v) {
@@ -490,6 +476,24 @@ class Var {
         friend Var operator <= ( const Var& a, const Var& b ) { return !(b<a); }
         friend Var operator >= ( const Var& a, const Var& b ) { return !(a<b); }
 
+        // mudando operadores para receber var e int
+        friend Var operator < (const Var& a, const int& b) { return a.asNumber() < b; }
+        friend Var operator < (const int& a, const Var& b) { return a < b.asNumber(); }
+
+        friend Var operator > (const Var& a, const int& b) { return b < a.asNumber(); }
+        friend Var operator > (const int& a, const Var& b) { return b.asNumber() < a; }
+
+        friend Var operator+(const Var& a, const int& b) { return a.asNumber() + b; }
+        friend Var operator+(const int& a, const Var& b) { return a + b.asNumber(); }
+
+        friend Var operator-(const Var& a, const int& b) { return a.asNumber() - b; }
+        friend Var operator-(const int& a, const Var& b) { return a - b.asNumber(); }
+
+        friend Var operator*(const Var& a, const int& b) { return a.asNumber() * b; }
+        friend Var operator*(const int& a, const Var& b) { return a * b.asNumber(); }
+
+        friend Var operator/(const Var& a, const int& b) { return a.asNumber() / b; }
+        friend Var operator/(const int& a, const Var& b) { return a / b.asNumber(); }
 
         // auxiliar functions
         static Var createOBJ() {
