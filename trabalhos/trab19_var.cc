@@ -1,6 +1,7 @@
 #include <iostream>
 #include <memory>
 #include <string>
+#include <sstream>
 #include <map>
 #include <functional>
 #include <vector>
@@ -27,6 +28,10 @@ class Undefined {
         virtual string asString() const {return "undefined";}
         virtual bool asBool() const {return false;}
         virtual bool isNumber() const {return false;}
+
+        template <class F>
+        Undefined forEach(F f = T_FUNC) const;
+
 };
 
 
@@ -128,7 +133,11 @@ class Var {
 
                 virtual double asNumber() const override { return d; }
 
-                virtual string asString() const override { return to_string(d); }
+                virtual string asString() const override { 
+                    ostringstream ss;
+                    ss << d;
+                    return ss.str();
+                }
 
                 virtual bool asBool() const override { return (bool)d; }
 
@@ -237,7 +246,14 @@ class Var {
 
                     for (auto i : this->atributos) { lista.push_back(i.second); }
                 }
+                int size = lista.size();
 
+                Undefined forEach(Function F) {
+                    for (int i=0; i < this->size; i++) {
+                        this->lista[i] = F.executar(lista[i]);
+                    }
+                    return Undefined();
+                }
         };
 
         class Bool: public Undefined {
@@ -510,6 +526,15 @@ class Var {
             Var v;
             v.valor = shared_ptr<Undefined>( new Array() );
             return v;
+        }
+
+        template <class F>
+        Undefined  forEach(F f) {
+            if (valor && valor->t == T_ARR) {
+                Array* arrPtr = static_cast<Array*>(valor.get());
+                for (auto& elemento : arrPtr->lista) f(elemento);
+            }
+            return Undefined();
         }
 
         // só pra me ajudar no debug (acabou q vou usar kakakakka)
