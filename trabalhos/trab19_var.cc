@@ -31,6 +31,9 @@ class Undefined {
 
         template <class F>
         Undefined forEach(F f = T_FUNC) const;
+        
+        template <class F>
+        Var filter(F f = T_FUNC) const;
 
 };
 
@@ -253,6 +256,16 @@ class Var {
                         this->lista[i] = F.executar(lista[i]);
                     }
                     return Undefined();
+                }
+
+                Var filter(Function F) {
+                    Var ret = Var::createARR();
+                    Array* arrPtr = static_cast<Array*>(ret.valor.get());
+                    
+                    for (size_t i = 0; i < this->lista.size(); i++) {
+                        if (F.executar(lista[i]).asBool()) arrPtr->lista.push_back(lista[i]);
+                    }
+                    return ret;
                 }
         };
 
@@ -532,10 +545,24 @@ class Var {
         Undefined  forEach(F f) {
             if (valor && valor->t == T_ARR) {
                 Array* arrPtr = static_cast<Array*>(valor.get());
-                for (auto& elemento : arrPtr->lista) f(elemento);
+                for (auto& i : arrPtr->lista) f(i);
             }
             return Undefined();
         }
+
+        template <class F>
+        Var filter(F f) {
+            Var ret = Var::createARR();
+            if (valor && valor->t == T_ARR) {
+                Array* arrPtrOriginal = static_cast<Array*>(valor.get());
+                Array* arrPtrNovo = static_cast<Array*>(ret.valor.get());
+                
+                for (auto& i : arrPtrOriginal->lista) {
+                    if (f(i))arrPtrNovo->lista.push_back(i);
+                }
+            }
+            return ret;
+        }   
 
         // só pra me ajudar no debug (acabou q vou usar kakakakka)
         string type() const {
