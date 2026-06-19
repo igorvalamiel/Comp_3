@@ -26,6 +26,7 @@ class Undefined {
         virtual double asNumber() const {return 0.0;}
         virtual string asString() const {return "undefined";}
         virtual bool asBool() const {return false;}
+        virtual bool isNumber() const {return false;}
 };
 
 
@@ -84,6 +85,8 @@ class Var {
                 virtual string asString() const override { return to_string(n); }
 
                 virtual bool asBool() const override { return (bool)n; }
+
+                virtual bool isNumber() const override { return true; }
         };
 
         class Double: public Undefined {
@@ -128,6 +131,8 @@ class Var {
                 virtual string asString() const override { return to_string(d); }
 
                 virtual bool asBool() const override { return (bool)d; }
+
+                virtual bool isNumber() const override { return true; }
         };
         
         class String: public Undefined {
@@ -147,7 +152,22 @@ class Var {
                     return Var();
                 }
 
+                virtual string asString() const override { return s; }
+
                 virtual bool asBool() const override { return !s.empty(); }
+
+                // OBS: usei IA nessa aqui 
+                virtual bool isNumber() const override {
+                    size_t first = s.find_first_not_of(" \t\n\r");
+                    if (first == string::npos) return true; // String vazia "" ou só espaços vira 0 (isNumber = true)
+
+                    size_t last = s.find_last_not_of(" \t\n\r");
+                    string trimmed = s.substr(first, last - first + 1);
+
+                    char* endptr;
+                    strtod(trimmed.c_str(), &endptr);
+                    return *endptr == '\0'; // Se processou tudo, é um número válido
+                }
         };
 
         class Char: public Undefined {
@@ -173,9 +193,10 @@ class Var {
 
                 virtual double asNumber() const override { return static_cast<double>(c); }
 
-                virtual string asString() const override { return to_string(c); }
+                virtual string asString() const override { return string(1, c); }
 
-                virtual bool asBool() const override { return (bool)c; }
+                virtual bool isNumber() const override { return c >= '0' && c <= '9'; }
+                virtual bool asBool() const override { return true; }
         };
 
         class Function : public Undefined {
@@ -203,6 +224,10 @@ class Var {
                     }
                     os << " }";
                 }
+
+                virtual string asString() const override { return "object"; }
+
+                virtual bool asBool() const override { return true; }
         };
 
         class Array: public Object {
@@ -244,6 +269,8 @@ class Var {
                 }
 
                 virtual bool asBool() const override { return b; }
+
+                virtual bool isNumber() const override { return true; }
         };
 
         class Erro {
@@ -257,8 +284,9 @@ class Var {
 
         
         // Conversão e Verificação de tipo
-        bool isNumber() {
-            return this->type() == "int" || this->type() == "double" || this->type() == "bool";
+        bool isNumber() const {
+            if (this->valor) return this->valor->isNumber();
+            return false;
         }
 
         bool isString() {
@@ -453,8 +481,7 @@ class Var {
         }
 
         friend Var operator ! ( const Var& a) {
-            if (a.valor->t == T_UNDEFINED) return true;
-            return !Var().asBool(); 
+            return Var(!a.asBool());
         }
 
         friend Var operator > (const Var& a, const Var& b) { return b<a; }
