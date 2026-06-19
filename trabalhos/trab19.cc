@@ -10,7 +10,8 @@ int main() {
 
     //for( auto& a: tab ) cout << "Valor=" << a << ":" << a.asString() << "," << a.asBool() << "," << !!a << "," << Var( a.isNumber() ) << endl;
 
-    int n = 0;
+    int n = 3;
+    //for (auto n : {0,1,2,3,4,5,6,7,8,9,10})
     cout << "Valor=" << tab[n] << ":" << tab[n].asString() << "," << tab[n].asBool() << "," << !!tab[n] << "," << Var( tab[n].isNumber() ) << endl;
 
     return 0;

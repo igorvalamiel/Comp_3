@@ -237,7 +237,13 @@ class Var {
 
                 virtual double asNumber() const override { return static_cast<double>(b); }
 
-                virtual string asString() const override { return to_string(b); }
+                virtual string asString() const override { 
+                    if (b) return "true";
+                    else if (!b) return "false";
+                    else return to_string(b);
+                }
+
+                virtual bool asBool() const override { return b; }
         };
 
         class Erro {
@@ -252,7 +258,7 @@ class Var {
         
         // Conversão e Verificação de tipo
         bool isNumber() {
-            return this->type() == "int" || this->type() == "double";
+            return this->type() == "int" || this->type() == "double" || this->type() == "bool";
         }
 
         bool isString() {
@@ -447,10 +453,8 @@ class Var {
         }
 
         friend Var operator ! ( const Var& a) {
-            if (a.valor->t == T_BOOL) {
-                return Var(!static_cast<const Bool*>(a.valor.get())->b);
-            }
-            return Var(); 
+            if (a.valor->t == T_UNDEFINED) return true;
+            return !Var().asBool(); 
         }
 
         friend Var operator > (const Var& a, const Var& b) { return b<a; }
