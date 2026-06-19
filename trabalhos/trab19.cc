@@ -6,16 +6,10 @@ using namespace std;
 
 int main() {
 
-    Var a, sq = []( int n ){ return n*n; };
+      Var a = newArray(), b = 0;
 
-    a = newArray();
+  a[b] = 0;
+  b[a[0]] = "a";
 
-    for( Var b = 0; (b < 10).asBool(); b = b + 1 )
-        a[b] = sq( b );
-
-    for( int i = 0; i < 10; i++ )
-        cout << a[i] << ";";
-
-    cout << endl;
     return 0;
 }

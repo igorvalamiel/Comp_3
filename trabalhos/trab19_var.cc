@@ -373,29 +373,26 @@ class Var {
 
 
         // lendo OBJ+ARR
-        Var operator[](Var v) const {
+        Var operator[](const Var& v) const {
             if (v.type() == "string") {
                 if (valor->t == T_OBJ) {
                     const Object* objPtr = static_cast<const Object*>(valor.get());
                     
                     string s = v.valor->asString();
                     auto it = objPtr->atributos.find(s);
-                    if (it != objPtr->atributos.end()) { return it->second; }
+                    if (it != objPtr->atributos.end()) { return (it->second); }
                     return Var();
                 }
                 throw Erro("Essa variável não é um objeto");
             } else if (v.type() == "int") {
                 if (valor->t == T_ARR) {
-                const Array* arrPtr = static_cast<const Array*>(valor.get());
-                
-                int n = v.valor->asNumber();
-                auto it = arrPtr->lista[n];
-                if (n > (int)arrPtr->lista.size()) { return arrPtr->lista[n].type(); }
-                return Var();
+                    const Array* arrPtr = static_cast<const Array*>(valor.get());
+                    int n = v.valor->asNumber();
+                    if (n < 0 || n >= (int)arrPtr->lista.size()) return Var();
+                    return arrPtr->lista[n];  // return the actual element
+                }
+                throw Erro("Essa variável não é um objeto");
             }
-            throw Erro("Essa variável não é um objeto");
-            }
-            throw Erro("Essa variável não é um objeto");
         }
 
         // escrevendo OBJ+ARR
@@ -421,6 +418,15 @@ class Var {
             }
             throw Erro("Essa variável não é um objeto");
         }
+
+        Var& operator[](const char* s) { return operator[](Var(s)); }
+        Var operator[](const char* s) const { return operator[](Var(s)); }
+
+        Var& operator[](const string& s) { return operator[](Var(s)); }
+        Var operator[](const string& s) const { return operator[](Var(s)); }
+
+        Var& operator[](int n) { return operator[](Var(n)); }
+        Var operator[](int n) const { return operator[](Var(n)); }
 
         Var operator()(Var arg) const {
             auto f = std::dynamic_pointer_cast<Function>(valor);
