@@ -267,6 +267,8 @@ class Var {
                     }
                     return ret;
                 }
+
+
         };
 
         class Bool: public Undefined {
@@ -375,6 +377,11 @@ class Var {
 
         Var& operator = (const char* s) {
             valor = shared_ptr<Undefined>(new String(s));
+            return *this;
+        }
+
+        Var& operator = (char c) {
+            valor = shared_ptr<Undefined>(new Char(c));
             return *this;
         }
 
@@ -505,7 +512,50 @@ class Var {
 
         friend Var operator > (const Var& a, const Var& b) { return b<a; }
         friend Var operator != ( const Var& a, const Var& b ) { return (a<b) || (b<a); }
-        friend Var operator == ( const Var& a, const Var& b ) { return !(a!=b); }
+
+        friend Var operator==(const Var& a, const Var& b) {
+            if (a.valor->t != b.valor->t){
+                if ((a.valor->t == T_CHAR && b.valor->t == T_STR) || (b.valor->t == T_CHAR && a.valor->t == T_STR)) {
+                    return Var(a.asString() == b.asString());
+                } else return Var(false);
+            }
+
+            switch(a.valor->t) {
+                case T_INT:
+                    return Var(
+                        static_cast<const Int*>(a.valor.get())->n ==
+                        static_cast<const Int*>(b.valor.get())->n
+                    );
+
+                case T_DOUBLE:
+                    return Var(
+                        static_cast<const Double*>(a.valor.get())->d ==
+                        static_cast<const Double*>(b.valor.get())->d
+                    );
+
+                case T_CHAR:
+                    return Var(
+                        static_cast<const Char*>(a.valor.get())->c ==
+                        static_cast<const Char*>(b.valor.get())->c
+                    );
+
+                case T_STR:
+                    return Var(
+                        static_cast<const String*>(a.valor.get())->s ==
+                        static_cast<const String*>(b.valor.get())->s
+                    );
+
+                case T_BOOL:
+                    return Var(
+                        static_cast<const Bool*>(a.valor.get())->b ==
+                        static_cast<const Bool*>(b.valor.get())->b
+                    );
+
+                default:
+                    return Var(false);
+            }
+        }
+
         friend Var operator <= ( const Var& a, const Var& b ) { return !(b<a); }
         friend Var operator >= ( const Var& a, const Var& b ) { return !(a<b); }
 
@@ -528,6 +578,9 @@ class Var {
         friend Var operator/(const Var& a, const int& b) { return a.asNumber() / b; }
         friend Var operator/(const int& a, const Var& b) { return a / b.asNumber(); }
 
+        friend Var operator == ( const Var& a, const int& b ) { return !(a.asNumber()!=b); }
+        friend Var operator == ( const int& a, const Var& b ) { return !(a!=b.asNumber()); }
+
         // auxiliar functions
         static Var createOBJ() {
             Var v;
@@ -542,7 +595,7 @@ class Var {
         }
 
         template <class F>
-        Undefined  forEach(F f) {
+        Undefined  forEach(F f) const {
             if (valor && valor->t == T_ARR) {
                 Array* arrPtr = static_cast<Array*>(valor.get());
                 for (auto& i : arrPtr->lista) f(i);
@@ -563,6 +616,22 @@ class Var {
             }
             return ret;
         }   
+
+        Var indexOf(const Var& valor_buscado) const {
+            if (valor && valor->t == T_ARR) {
+                const Array* arrPtr = static_cast<const Array*>(valor.get());
+                
+                for (int i = 0; i < (int)arrPtr->lista.size(); i++) {
+                    if ((arrPtr->lista[i] == valor_buscado).asBool()) return Var(i);
+                }
+            }
+            return Var(-1);
+        }
+
+        Var indexOf(const char* s) const { return indexOf(Var(s)); }
+        Var indexOf(const string& s) const { return indexOf(Var(s)); }
+        Var indexOf(int n) const { return indexOf(Var(n)); }
+        Var indexOf(char c) const { return indexOf(Var(c)); }
 
         // só pra me ajudar no debug (acabou q vou usar kakakakka)
         string type() const {

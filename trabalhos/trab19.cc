@@ -6,10 +6,9 @@ using namespace std;
 
 int main() {
 
-      Var a = newArray(), b = 0;
-
-  a[b] = 0;
-  b[a[0]] = "a";
+    cout << (Var(0) == Var("A")) << endl;
+    cout << (Var(36) == Var("A")) << endl;
+    cout << (Var('A') == Var("A")) << endl;
 
     return 0;
 }
