@@ -22,6 +22,10 @@ class Undefined {
         virtual Var Multiplica(const Undefined* outro) const;
         virtual Var Divide(const Undefined* outro) const;
         virtual Var Menor(const Undefined* outro) const;
+
+        virtual double asNumber() const {return 0.0;}
+        virtual string asString() const {return "undefined";}
+        virtual bool asBool() const {return false;}
 };
 
 
@@ -74,6 +78,12 @@ class Var {
                     if (outro->t == T_CHAR) return Var(this->n < static_cast<const Char*>(outro)->c);
                     return Var();
                 }
+
+                virtual double asNumber() const override { return static_cast<double>(n); }
+
+                virtual string asString() const override { return to_string(n); }
+
+                virtual bool asBool() const override { return (bool)n; }
         };
 
         class Double: public Undefined {
@@ -112,6 +122,12 @@ class Var {
                     if (outro->t == T_CHAR) return Var(this->d < static_cast<const Char*>(outro)->c);
                     return Var();
                 }
+
+                virtual double asNumber() const override { return d; }
+
+                virtual string asString() const override { return to_string(d); }
+
+                virtual bool asBool() const override { return (bool)d; }
         };
         
         class String: public Undefined {
@@ -130,6 +146,8 @@ class Var {
                     if (outro->t == T_STR) return Var(this->s < static_cast<const String*>(outro)->s);
                     return Var();
                 }
+
+                virtual bool asBool() const override { return !s.empty(); }
         };
 
         class Char: public Undefined {
@@ -152,6 +170,12 @@ class Var {
                     if (outro->t == T_STR) return Var(string(1, this->c) < static_cast<const String*>(outro)->s);
                     return Var();
                 }
+
+                virtual double asNumber() const override { return static_cast<double>(c); }
+
+                virtual string asString() const override { return to_string(c); }
+
+                virtual bool asBool() const override { return (bool)c; }
         };
 
         class Function : public Undefined {
@@ -187,7 +211,7 @@ class Var {
                 Array(): Object() {
                     this->t=T_ARR;
 
-                    for (auto i : this->atributos) { lista.push_back(i); }
+                    for (auto i : this->atributos) { lista.push_back(i.second); }
                 }
 
         };
@@ -210,6 +234,10 @@ class Var {
                     if (outro->t == T_BOOL) return Var(this->b < static_cast<const Bool*>(outro)->b);
                     return Var();
                 }
+
+                virtual double asNumber() const override { return static_cast<double>(b); }
+
+                virtual string asString() const override { return to_string(b); }
         };
 
         class Erro {
@@ -221,8 +249,45 @@ class Var {
                 string msg;
         };
 
-        // Operators
         
+        // Conversão e Verificação de tipo
+        bool isNumber() {
+            return this->type() == "int" || this->type() == "double";
+        }
+
+        bool isString() {
+            return this->type() == "string";
+        }
+
+        bool isBool() {
+            return this->type() == "bool";
+        }
+
+        bool isObject() {
+            return this->type() == "object" || this->type() == "array";
+        }
+        
+        bool isUndefined() {
+            return this->type() == "undefined";
+        }
+
+        double asNumber() const {
+            if (this->valor) return this->valor->asNumber();
+            return 0.0;
+        }
+
+        string asString() const {
+            if (this->valor) return this->valor->asString();
+            return "null";
+        }
+
+        bool asBool() const {
+            if (this->valor) return this->valor->asBool();
+            return false;
+        }
+
+        
+        // Operators
         Var& operator = (int n) {
             valor = shared_ptr<Undefined>( new Int( n ) );
             return *this;
@@ -265,7 +330,9 @@ class Var {
             return a.valor->Divide(b.valor.get());
         }
 
+
         // lendo OBJ+ARR
+        /*
         Var operator[](Var v) const {
             if (v.type() == "string") {
                 if (valor->t == T_OBJ) {
@@ -290,6 +357,7 @@ class Var {
             }
             throw Erro("Essa variável não é um objeto");
         }
+        */
 /*
         // lendo OBJ
         Var operator[](string s) const {
