@@ -44,6 +44,11 @@ static string p_if_eq(const Term& t, int parent_prec) {
     else return t.s;
 }
 
+static Term make_neg(const Term& a) {
+    if (a.is_zero) return Term("0", PREC_ATOM, true);
+    return Term("-" + p_if_eq(a, PREC_MUL), PREC_MUL);
+}
+
 // x + 0 = x    |   0 + x = x
 static Term make_add(const Term& a, const Term& b) {
     if (a.is_zero) return b;
@@ -54,7 +59,7 @@ static Term make_add(const Term& a, const Term& b) {
 // x - 0 = x    |   0 - x = -x
 static Term make_sub(const Term& a, const Term& b) {
     if (b.is_zero) return a;
-    if (a.is_zero) return Term("-" + p_if_eq(b, PREC_MUL), PREC_ADD);
+    if (a.is_zero) return make_neg(b);
     return Term(p_if(a, PREC_ADD) + "-" + p_if_eq(b, PREC_ADD), PREC_ADD);
 }
 
@@ -319,7 +324,7 @@ class Exp {
         Term str() const {return Term("exp(" + f.str().s + ")", PREC_ATOM);}
         Term dx_str() const {
             Term expf("exp(" + f.str().s + ")", PREC_ATOM);
-            return make_mul(f.dx_str(), expf);
+            return make_mul(expf, f.dx_str());
         }
     
     private:

@@ -12,6 +12,7 @@ constexpr int PREC_POW  = 30;  // ^
 constexpr int PREC_MUL  = 20;  // * /
 constexpr int PREC_ADD  = 10;  // + -
 
+// classe que vai simplificar as expressões automaticamente
 struct Term {
     string s;
     int prec;
@@ -43,6 +44,12 @@ static string p_if_eq(const Term& t, int parent_prec) {
     else return t.s;
 }
 
+// Negação unária com precedência alta
+static Term make_neg(const Term& a) {
+    if (a.is_zero) return Term("0", PREC_ATOM, true);
+    return Term("-" + p_if_eq(a, PREC_MUL), PREC_MUL);
+}
+
 // x + 0 = x    |   0 + x = x
 static Term make_add(const Term& a, const Term& b) {
     if (a.is_zero) return b;
@@ -53,7 +60,7 @@ static Term make_add(const Term& a, const Term& b) {
 // x - 0 = x    |   0 - x = -x
 static Term make_sub(const Term& a, const Term& b) {
     if (b.is_zero) return a;
-    if (a.is_zero) return Term("-" + p_if_eq(b, PREC_ADD), PREC_ADD);
+    if (a.is_zero) return make_neg(b);
     return Term(p_if(a, PREC_ADD) + "-" + p_if_eq(b, PREC_ADD), PREC_ADD);
 }
 
@@ -292,7 +299,7 @@ public:
         stringstream ss; ss << g;
         Term coef(ss.str(), PREC_ATOM, false, g == 1);
         Term lower_pow = make_pow(f.str(), g - 1);
-        // Alterado: (coef * f.dx_str()) * lower_pow para obter a ordem correta
+        // n * f' * f^(n-1)
         return make_mul(make_mul(coef, f.dx_str()), lower_pow);
     }
 
@@ -319,8 +326,8 @@ class Exp {
         Term str() const {return Term("exp(" + f.str().s + ")", PREC_ATOM);}
         Term dx_str() const {
             Term expf("exp(" + f.str().s + ")", PREC_ATOM);
-            // Alterado: f.dx_str() * expf para obter a ordem correta
-            return make_mul(f.dx_str(), expf);
+            // exp(f) * f'
+            return make_mul(expf, f.dx_str());
         }
     
     private:
@@ -342,7 +349,7 @@ class Log {
         double dx(double v) const {return f.dx(v) / f.e(v);}
         Term str() const {return Term("log(" + f.str().s + ")", PREC_ATOM);}
         Term dx_str() const {
-            // Alterado: (1/f) * f' em vez de f'/f
+            // (1/f) * f'
             Term one_over_f = make_div(Term("1", PREC_ATOM, false, true), f.str());
             return make_mul(one_over_f, f.dx_str());
         }
@@ -389,7 +396,7 @@ class Cos {
         double dx(double v) const {return -1 * std::sin(f.e(v)) * f.dx(v);}
         Term str() const {return Term("cos(" + f.str().s + ")", PREC_ATOM);}
         Term dx_str() const {
-            // Alterado: precedência PREC_MUL para evitar parênteses desnecessários
+            // Negação com precedência PREC_MUL para evitar parênteses
             Term neg_sinf("-sin(" + f.str().s + ")", PREC_MUL);
             return make_mul(neg_sinf, f.dx_str());
         }
