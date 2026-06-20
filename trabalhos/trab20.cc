@@ -17,14 +17,18 @@ struct Node {
         double  at(int i, int j) const { return (*data)[i * colunas + j]; }
 };
 
+template<int L,int C>
 class Otimizador;
+
+template<int L, int C>
+class Soma;
 
 template <int L, int C>
 class Matriz {
     public:
         Matriz() : mat_node(make_shared<Node>(L, C)) {}
 
-        Matriz(const Otimizador& opt);
+        Matriz(const Otimizador<L,C>& opt);
 
         shared_ptr<Node> node() const { return mat_node; }
 
@@ -47,6 +51,7 @@ class Matriz {
         shared_ptr<Node> mat_node;
 };
 
+template<int L,int C>
 class Otimizador {
     public:
         vector<shared_ptr<Node>> operandos;
@@ -67,25 +72,36 @@ class Otimizador {
 };
 
 template<int L,int C>
-Matriz<L,C>::Matriz(const Otimizador& opt) : mat_node(make_shared<Node>(L,C)) {
+Matriz<L,C>::Matriz(const Otimizador<L,C>& opt) : mat_node(make_shared<Node>(L,C)) {
     for(int i=0;i<L;i++)
         for(int j=0;j<C;j++)
             (*this)[i][j] = 0;
 }
  
 template <int L, int LC, int C>
-Otimizador operator * ( const Matriz<L,LC>& a, const Matriz<LC,C>& b ) {
+Otimizador<L,C> operator * ( const Matriz<L,LC>& a, const Matriz<LC,C>& b ) {
     auto nA = a.node();
     auto nB = b.node();
-    return Otimizador(nA, nB);
+    return Otimizador<L,C>(nA, nB);
 }
 
-template <int LC, int C>
-Otimizador operator*(Otimizador opt, const Matriz<LC,C>& b) {
+template <int L, int C>
+Otimizador<L,C> operator*(Otimizador<L,C> opt, const Matriz<L,C>& b) {
     opt.add(b.node());
     return opt;
 }
 
+template<int L, int LC, int C>
+Otimizador<L,C> operator*(const Matriz<L,LC>& a, const Soma<LC,C>&) { return Otimizador(a.node(), make_shared<Node>(LC,C)); }
+
+template<int L,int C>
+Soma<L,C> operator+(const Matriz<L,C>&, const Otimizador<L,C>&) { return Soma<L,C>(L,C); }
+
+template<int L,int C>
+Soma<L,C> operator+(const Otimizador<L,C>&, const Matriz<L,C>&) { return Soma<L,C>(L,C); }
+
+template<int L,int C>
+Soma<L,C> operator+(const Otimizador<L,C>&, const Otimizador<L,C>&) { return Soma<L,C>(L,C); }
 
 // operações
 template<int L, int C>
@@ -108,7 +124,7 @@ template<int L, int C>
 Soma<L,C> operator+(const Matriz<L,C>&, Soma<L,C> s) { return s; }
 template<int L, int C>
 inline Soma<L,C> operator+(Soma<L,C> a, Soma<L,C>) { return a; }
- 
+
 template <typename F>
 class Apply {
     public:
@@ -123,17 +139,18 @@ class Apply {
         return resultado;
     }
 
-    void operator()(const Otimizador& o) const {
-        for(int i=0;i<o.nLin();i++)
-            for(int j=0;j<o.nCol();j++)
+    // operações
+    template<int L,int C>
+    void operator()(const Soma<L,C>& s) const {
+        for(int i=0;i<s.nLin();i++)
+            for(int j=0;j<s.nCol();j++)
                 f(0.0);
     }
 
-    // operações
-    template<int L, int C>
-    void operator()(const Soma<L,C>& s) const {
-        for (int i = 0; i < s.nLin(); ++i)
-            for (int j = 0; j < s.nCol(); ++j)
+    template<int L,int C>
+    void operator()(const Otimizador<L,C>& o) const {
+        for(int i=0;i<o.nLin();i++)
+            for(int j=0;j<o.nCol();j++)
                 f(0.0);
     }
 
