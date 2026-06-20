@@ -71,7 +71,7 @@ Otimizador operator * ( const Matriz<L,LC>& a, const Matriz<LC,C>& b ) {
 
 template <typename Tag, int LC, int C>
 Otimizador operator*(Otimizador opt, const Matriz<LC,C>& b) {
-    opt.acrescentar(b.node());
+    opt.add(b.node());
     return opt;
 }
  
@@ -82,7 +82,11 @@ class Apply {
 
     template <int L, int C>
     Matriz<L,C> operator()( const Matriz<L,C>& m ) const {
-    // Aplica a função membro 'f' a cada elemento e retorna a nova matriz
+        Matriz<L,C> resultado;
+        for (int i = 0; i < L; ++i)
+            for (int j = 0; j < C; ++j)
+                resultado[i][j] = f(m[i][j]);
+        return resultado;
     }
     private:
     F f;
