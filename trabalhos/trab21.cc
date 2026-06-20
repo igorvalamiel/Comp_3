@@ -40,7 +40,7 @@ static string p_if(const Term& t, int parent_prec) {
 }
 
 static string p_if_eq(const Term& t, int parent_prec) {
-    if (t.prec < parent_prec) return "(" + t.s + ")";
+    if (t.prec <= parent_prec) return "(" + t.s + ")";
     else return t.s;
 }
 
