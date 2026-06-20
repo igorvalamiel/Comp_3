@@ -74,6 +74,29 @@ Otimizador operator*(Otimizador opt, const Matriz<LC,C>& b) {
     opt.add(b.node());
     return opt;
 }
+
+
+// operações
+template<int L, int C>
+class Soma {
+public:
+    int linhas;
+    int colunas;
+
+    Soma(int l, int c) : linhas(l), colunas(c) {}
+
+    int nLin() const { return linhas; }
+    int nCol() const { return colunas; }
+};
+
+template<int L, int C>
+Soma<L,C> operator+(const Matriz<L,C>& a, const Matriz<L,C>& b) { return Soma<L,C>(L, C); }
+template<int L, int C>
+Soma<L,C> operator+(Soma<L,C> s, const Matriz<L,C>&) { return s; }
+template<int L, int C>
+Soma<L,C> operator+(const Matriz<L,C>&, Soma<L,C> s) { return s; }
+template<int L, int C>
+inline Soma<L,C> operator+(Soma<L,C> a, Soma<L,C>) { return a; }
  
 template <typename F>
 class Apply {
@@ -92,6 +115,14 @@ class Apply {
     void operator()(const Otimizador& o) const {
         for(int i=0;i<o.nLin();i++)
             for(int j=0;j<o.nCol();j++)
+                f(0.0);
+    }
+
+    // operações
+    template<int L, int C>
+    void operator()(const Soma<L,C>& s) const {
+        for (int i = 0; i < s.nLin(); ++i)
+            for (int j = 0; j < s.nCol(); ++j)
                 f(0.0);
     }
 
