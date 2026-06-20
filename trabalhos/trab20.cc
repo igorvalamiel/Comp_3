@@ -69,7 +69,7 @@ Otimizador operator * ( const Matriz<L,LC>& a, const Matriz<LC,C>& b ) {
     return Otimizador(nA, nB);
 }
 
-template <typename Tag, int LC, int C>
+template <int LC, int C>
 Otimizador operator*(Otimizador opt, const Matriz<LC,C>& b) {
     opt.add(b.node());
     return opt;
@@ -88,6 +88,13 @@ class Apply {
                 resultado[i][j] = f(m[i][j]);
         return resultado;
     }
+
+    void operator()(const Otimizador& o) const {
+        for(int i=0;i<o.nLin();i++)
+            for(int j=0;j<o.nCol();j++)
+                f(0.0);
+    }
+
     private:
     F f;
 };
