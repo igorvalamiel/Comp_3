@@ -46,7 +46,7 @@ static string p_if_eq(const Term& t, int parent_prec) {
 
 static Term make_neg(const Term& a) {
     if (a.is_zero) return Term("0", PREC_ATOM, true);
-    return Term("-" + p_if_eq(a, PREC_MUL), PREC_MUL);
+    return Term("-" + p_if(a, PREC_MUL), PREC_MUL);
 }
 
 // x + 0 = x    |   0 + x = x
