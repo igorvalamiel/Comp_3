@@ -6,14 +6,7 @@
 
 using namespace std;
 
-// ----------------------------------------------------------------------------
-// Infraestrutura de simplificação / impressão
-//
-// Cada nó passa a devolver um "Term": a string já simplificada, a sua
-// precedência (para saber quando precisa de parênteses) e se ela representa
-// literalmente 0 ou 1 (para eliminar termos neutros como 0+x, 1*x, x^0...).
-// ----------------------------------------------------------------------------
-
+// "Tabela" das predências
 constexpr int PREC_ATOM = 100; // x, constantes, sin(...), cos(...), exp(...), log(...)
 constexpr int PREC_POW  = 30;  // ^
 constexpr int PREC_MUL  = 20;  // * /
@@ -25,24 +18,14 @@ struct Term {
     bool is_zero;
     bool is_one;
 
-    Term(string s, int prec, bool is_zero = false, bool is_one = false)
-        : s(move(s)), prec(prec), is_zero(is_zero), is_one(is_one) {}
+    Term(string s, int prec, bool is_zero = false, bool is_one = false) : s(move(s)), prec(prec), is_zero(is_zero), is_one(is_one) {}
 
     operator string() const { return s; }
 };
 
 ostream& operator<<(ostream& os, const Term& t) { return os << t.s; }
 
-// parêntese se a precedência do filho for MENOR que a do pai
-// (uso em lados comutativos/associativos: + com +, * com *, etc.)
-static string p_if(const Term& t, int parent_prec) {
-    return (t.prec < parent_prec) ? ("(" + t.s + ")") : t.s;
-}
-// parêntese se a precedência do filho for MENOR OU IGUAL à do pai
-// (uso no lado direito de operações não-comutativas: a-(b...), a/(b...), base de potência)
-static string p_if_eq(const Term& t, int parent_prec) {
-    return (t.prec <= parent_prec) ? ("(" + t.s + ")") : t.s;
-}
+// funções auxiliares para a simplificação
 
 static string num_to_str(double v) {
     stringstream ss;
@@ -50,34 +33,49 @@ static string num_to_str(double v) {
     return ss.str();
 }
 
+static string p_if(const Term& t, int parent_prec) {
+    if (t.prec < parent_prec) return "(" + t.s + ")";
+    else return t.s;
+}
+
+static string p_if_eq(const Term& t, int parent_prec) {
+    if (t.prec <= parent_prec) return "(" + t.s + ")";
+    else return t.s;
+}
+
+// x + 0 = x    |   0 + x = x
 static Term make_add(const Term& a, const Term& b) {
-    if (a.is_zero) return b;                 // 0+g = g
-    if (b.is_zero) return a;                 // f+0 = f
+    if (a.is_zero) return b;
+    if (b.is_zero) return a;
     return Term(p_if(a, PREC_ADD) + "+" + p_if(b, PREC_ADD), PREC_ADD);
 }
 
+// x - 0 = x    |   0 - x = -x
 static Term make_sub(const Term& a, const Term& b) {
-    if (b.is_zero) return a;                                  // f-0 = f
-    if (a.is_zero) return Term("-" + p_if_eq(b, PREC_MUL), PREC_ADD); // 0-g = -g
+    if (b.is_zero) return a;
+    if (a.is_zero) return Term("-" + p_if_eq(b, PREC_ADD), PREC_ADD);
     return Term(p_if(a, PREC_ADD) + "-" + p_if_eq(b, PREC_ADD), PREC_ADD);
 }
 
+// 0 * x = 0    |   1 * x = x
 static Term make_mul(const Term& a, const Term& b) {
-    if (a.is_zero || b.is_zero) return Term("0", PREC_ATOM, true); // 0*g = f*0 = 0
-    if (a.is_one) return b;                                        // 1*g = g
-    if (b.is_one) return a;                                        // f*1 = f
+    if (a.is_zero || b.is_zero) return Term("0", PREC_ATOM, true);
+    if (a.is_one) return b;                                       
+    if (b.is_one) return a;                                       
     return Term(p_if(a, PREC_MUL) + "*" + p_if(b, PREC_MUL), PREC_MUL);
 }
 
+// 0 / g = 0    |   f / 1 = f
 static Term make_div(const Term& a, const Term& b) {
-    if (a.is_zero) return Term("0", PREC_ATOM, true); // 0/g = 0
-    if (b.is_one) return a;                            // f/1 = f
+    if (a.is_zero) return Term("0", PREC_ATOM, true);
+    if (b.is_one) return a;                          
     return Term(p_if(a, PREC_MUL) + "/" + p_if_eq(b, PREC_MUL), PREC_MUL);
 }
 
+// f ^ 0 = 1    |   f ^ 1 = f
 static Term make_pow(const Term& base, int n) {
-    if (n == 0) return Term("1", PREC_ATOM, false, true); // f^0 = 1
-    if (n == 1) return base;                                // f^1 = f
+    if (n == 0) return Term("1", PREC_ATOM, false, true);
+    if (n == 1) return base;                             
     stringstream ss; ss << n;
     return Term(p_if_eq(base, PREC_POW) + "^" + ss.str(), PREC_POW);
 }
@@ -192,9 +190,7 @@ class Multiplicacao {
         double e(double v) const {return f.e(v) * g.e(v);}
         double dx(double v) const {return (f.dx(v) * g.e(v)) + (f.e(v) * g.dx(v));}
         Term str() const {return make_mul(f.str(), g.str());}
-        Term dx_str() const {
-            return make_add(make_mul(f.dx_str(), g.str()), make_mul(f.str(), g.dx_str()));
-        }
+        Term dx_str() const {return make_add(make_mul(f.dx_str(), g.str()), make_mul(f.str(), g.dx_str()));}
     
     private:
         F f;
@@ -296,7 +292,8 @@ public:
         stringstream ss; ss << g;
         Term coef(ss.str(), PREC_ATOM, false, g == 1);
         Term lower_pow = make_pow(f.str(), g - 1);
-        return make_mul(make_mul(coef, lower_pow), f.dx_str());
+        // Alterado: (coef * f.dx_str()) * lower_pow para obter a ordem correta
+        return make_mul(make_mul(coef, f.dx_str()), lower_pow);
     }
 
 private:
@@ -322,7 +319,8 @@ class Exp {
         Term str() const {return Term("exp(" + f.str().s + ")", PREC_ATOM);}
         Term dx_str() const {
             Term expf("exp(" + f.str().s + ")", PREC_ATOM);
-            return make_mul(expf, f.dx_str());
+            // Alterado: f.dx_str() * expf para obter a ordem correta
+            return make_mul(f.dx_str(), expf);
         }
     
     private:
@@ -343,7 +341,11 @@ class Log {
         double e(double v) const {return std::log(f.e(v));}
         double dx(double v) const {return f.dx(v) / f.e(v);}
         Term str() const {return Term("log(" + f.str().s + ")", PREC_ATOM);}
-        Term dx_str() const {return make_div(f.dx_str(), f.str());}
+        Term dx_str() const {
+            // Alterado: (1/f) * f' em vez de f'/f
+            Term one_over_f = make_div(Term("1", PREC_ATOM, false, true), f.str());
+            return make_mul(one_over_f, f.dx_str());
+        }
     
     private:
         F f;
@@ -387,7 +389,8 @@ class Cos {
         double dx(double v) const {return -1 * std::sin(f.e(v)) * f.dx(v);}
         Term str() const {return Term("cos(" + f.str().s + ")", PREC_ATOM);}
         Term dx_str() const {
-            Term neg_sinf("-sin(" + f.str().s + ")", PREC_ADD);
+            // Alterado: precedência PREC_MUL para evitar parênteses desnecessários
+            Term neg_sinf("-sin(" + f.str().s + ")", PREC_MUL);
             return make_mul(neg_sinf, f.dx_str());
         }
     
@@ -398,12 +401,4 @@ class Cos {
 template <typename F>
 auto cos(const F& f) {
     return Cos{f};
-}
-
-// ----------------------------------------------------------------------------
-int main(){
-    auto f = 3.0 + x + x;
-    cout << "f(x) = " << f.str() << "\n f'(x) = " << f.dx_str() << endl;
-
-    return 0;
 }

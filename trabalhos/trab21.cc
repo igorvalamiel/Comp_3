@@ -293,7 +293,7 @@ public:
         stringstream ss; ss << g;
         Term coef(ss.str(), PREC_ATOM, false, g == 1);
         Term lower_pow = make_pow(f.str(), g - 1);
-        return make_mul(make_mul(coef, lower_pow), f.dx_str());
+        return make_mul(make_mul(coef, f.dx_str()), lower_pow);
     }
 
 private:
@@ -319,7 +319,7 @@ class Exp {
         Term str() const {return Term("exp(" + f.str().s + ")", PREC_ATOM);}
         Term dx_str() const {
             Term expf("exp(" + f.str().s + ")", PREC_ATOM);
-            return make_mul(expf, f.dx_str());
+            return make_mul(f.dx_str(), expf);
         }
     
     private:
@@ -340,7 +340,10 @@ class Log {
         double e(double v) const {return std::log(f.e(v));}
         double dx(double v) const {return f.dx(v) / f.e(v);}
         Term str() const {return Term("log(" + f.str().s + ")", PREC_ATOM);}
-        Term dx_str() const {return make_div(f.dx_str(), f.str());}
+        Term dx_str() const {
+            Term one_over_f = make_div(Term("1", PREC_ATOM, false, true), f.str());
+            return make_mul(one_over_f, f.dx_str());
+        }
     
     private:
         F f;
@@ -384,7 +387,7 @@ class Cos {
         double dx(double v) const {return -1 * std::sin(f.e(v)) * f.dx(v);}
         Term str() const {return Term("cos(" + f.str().s + ")", PREC_ATOM);}
         Term dx_str() const {
-            Term neg_sinf("-sin(" + f.str().s + ")", PREC_ADD);
+            Term neg_sinf("-sin(" + f.str().s + ")", PREC_MUL);
             return make_mul(neg_sinf, f.dx_str());
         }
     
@@ -399,7 +402,7 @@ auto cos(const F& f) {
 
 // ---------------------------------------------------------------------------
 int main(){
-    auto f = 3.0 + x + x;
+    auto f = (7.0*x+5.0)->*3;
     cout << "f(x) = " << f.str() << "\n f'(x) = " << f.dx_str() << endl;
 
     return 0;
