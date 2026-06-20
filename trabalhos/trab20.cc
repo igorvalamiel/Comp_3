@@ -30,6 +30,8 @@ class Matriz {
 
         Matriz(const Otimizador<L,C>& opt);
 
+        Matriz(const Soma<L,C>& s);
+
         shared_ptr<Node> node() const { return mat_node; }
 
         struct Linha {
@@ -77,6 +79,13 @@ Matriz<L,C>::Matriz(const Otimizador<L,C>& opt) : mat_node(make_shared<Node>(L,C
         for(int j=0;j<C;j++)
             (*this)[i][j] = 0;
 }
+
+template<int L,int C>
+Matriz<L,C>::Matriz(const Soma<L,C>& s) : mat_node(make_shared<Node>(L,C)) {
+    for(int i=0;i<L;i++)
+        for(int j=0;j<C;j++)
+            (*this)[i][j] = 0;
+}
  
 template <int L, int LC, int C>
 Otimizador<L,C> operator * ( const Matriz<L,LC>& a, const Matriz<LC,C>& b ) {
@@ -92,7 +101,9 @@ Otimizador<L,C> operator*(Otimizador<L,C> opt, const Matriz<L,C>& b) {
 }
 
 template<int L, int LC, int C>
-Otimizador<L,C> operator*(const Matriz<L,LC>& a, const Soma<LC,C>&) { return Otimizador(a.node(), make_shared<Node>(LC,C)); }
+Otimizador<L,C> operator*(const Matriz<L,LC>& a, const Soma<LC,C>&) { 
+    return Otimizador<L,C>(a.node(), make_shared<Node>(LC,C)); 
+}
 
 template<int L,int C>
 Soma<L,C> operator+(const Matriz<L,C>&, const Otimizador<L,C>&) { return Soma<L,C>(L,C); }
