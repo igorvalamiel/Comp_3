@@ -17,10 +17,14 @@ struct Node {
         double  at(int i, int j) const { return (*data)[i * colunas + j]; }
 };
 
+class Otimizador;
+
 template <int L, int C>
 class Matriz {
     public:
         Matriz() : mat_node(make_shared<Node>(L, C)) {}
+
+        Matriz(const Otimizador& opt);
 
         shared_ptr<Node> node() const { return mat_node; }
 
@@ -61,6 +65,13 @@ class Otimizador {
         int nLin() const { return linhas;  }
         int nCol() const { return colunas; }
 };
+
+template<int L,int C>
+Matriz<L,C>::Matriz(const Otimizador& opt) : mat_node(make_shared<Node>(L,C)) {
+    for(int i=0;i<L;i++)
+        for(int j=0;j<C;j++)
+            (*this)[i][j] = 0;
+}
  
 template <int L, int LC, int C>
 Otimizador operator * ( const Matriz<L,LC>& a, const Matriz<LC,C>& b ) {
